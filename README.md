@@ -1,4 +1,4 @@
-# CSE 115A Time Capsule
+# CSE 115A Voice Capsule
 
 <h3>Project Members:</h3> 
 Daniel Zuniga  
