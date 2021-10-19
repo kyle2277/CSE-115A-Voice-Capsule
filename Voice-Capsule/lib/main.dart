@@ -32,8 +32,13 @@ class ApplicationState extends ChangeNotifier {
   String? _email;
   String? get email => _email;
 
-  void startLoginFlow() {
-    _loginState = ApplicationLoginState.emailAddress;
+  void startLoginFlow(bool signup) {
+    print(signup);
+    if(signup == false){
+      _loginState = ApplicationLoginState.emailAddress;
+    } else{
+      _loginState = ApplicationLoginState.register;
+    }
     notifyListeners();
   }
 
@@ -73,6 +78,11 @@ class ApplicationState extends ChangeNotifier {
 
   void cancelRegistration() {
     _loginState = ApplicationLoginState.emailAddress;
+    notifyListeners();
+  }
+
+  void cancelLogin() {
+    _loginState = ApplicationLoginState.loggedOut;
     notifyListeners();
   }
 
@@ -156,6 +166,7 @@ class LoginCard extends StatelessWidget {
             registerAccount: appState.registerAccount,
             signOut: appState.signOut,
             navToHome: appState.navToHome,
+            cancelLogin: appState.cancelLogin,
           ),
         ),
       ),

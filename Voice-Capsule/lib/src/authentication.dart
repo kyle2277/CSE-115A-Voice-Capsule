@@ -21,6 +21,7 @@ class Authentication extends StatelessWidget {
     required this.registerAccount,
     required this.signOut,
     required this.navToHome,
+    required this.cancelLogin,
   });
 
   final void Function(
@@ -28,7 +29,7 @@ class Authentication extends StatelessWidget {
       ) navToHome;
   final ApplicationLoginState loginState;
   final String? email;
-  final void Function() startLoginFlow;
+  final void Function(bool signup) startLoginFlow;
   final void Function(
       String email,
       void Function(Exception e) error,
@@ -39,6 +40,7 @@ class Authentication extends StatelessWidget {
       void Function(Exception e) error,
       ) signInWithEmailAndPassword;
   final void Function() cancelRegistration;
+  final void Function() cancelLogin;
   final void Function(
       String email,
       String displayName,
@@ -51,21 +53,43 @@ class Authentication extends StatelessWidget {
   Widget build(BuildContext context) {
     switch (loginState) {
       case ApplicationLoginState.loggedOut:
-        return Center(
-          child: OutlinedButton(
-            onPressed: () {
-              startLoginFlow();
-            },
-            child: const Text('Login'),
-          ),
+        return Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 100, bottom: 8),
+              child: StyledButton(
+                onPressed: () {
+                  bool sig = false;
+                  startLoginFlow(sig);
+                },
+                child: const Text('Login'),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 100, bottom: 8),
+              child: StyledButton(
+                onPressed: () {
+                  bool sig = true;
+                  startLoginFlow(sig);
+                },
+                child: const Text('Signup'),
+              ),
+            ),
+          ],
         );
       case ApplicationLoginState.emailAddress:
         return EmailForm(
+            cancel: () {
+              cancelLogin();
+            },
             callback: (email) => verifyEmail(
                 email, (e) => _showErrorDialog(context, 'Invalid email', e)));
       case ApplicationLoginState.password:
         return PasswordForm(
           email: email!,
+          cancel: () {
+            cancelRegistration();
+          },
           login: (email, password) {
             signInWithEmailAndPassword(email, password,
                     (e) => _showErrorDialog(context, 'Failed to sign in', e));
@@ -151,8 +175,12 @@ class Authentication extends StatelessWidget {
 }
 
 class EmailForm extends StatefulWidget {
-  const EmailForm({required this.callback});
+  const EmailForm({
+    required this.cancel,
+    required this.callback,
+  });
   final void Function(String email) callback;
+  final void Function() cancel;
   @override
   _EmailFormState createState() => _EmailFormState();
 }
@@ -191,7 +219,15 @@ class _EmailFormState extends State<EmailForm> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Padding(
+                    Padding( //Cancel button
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 16.0, horizontal: 30),
+                      child: TextButton(
+                        onPressed: widget.cancel,
+                        child: const Text('Cancel'),
+                      ),
+                    ),
+                    Padding( //Next button
                       padding: const EdgeInsets.symmetric(
                           vertical: 16.0, horizontal: 30),
                       child: StyledButton(
@@ -338,9 +374,11 @@ class PasswordForm extends StatefulWidget {
     required this.login,
     required this.email,
     required this.navToHome,
+    required this.cancel,
   });
   final void Function(BuildContext context) navToHome;
   final String email;
+  final void Function() cancel;
   final void Function(String email, String password) login;
   @override
   _PasswordFormState createState() => _PasswordFormState();
@@ -406,6 +444,11 @@ class _PasswordFormState extends State<PasswordForm> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       const SizedBox(width: 16),
+
+                      TextButton(
+                        onPressed: widget.cancel,
+                        child: const Text('Cancel'),
+                      ),
                       StyledButton(
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
