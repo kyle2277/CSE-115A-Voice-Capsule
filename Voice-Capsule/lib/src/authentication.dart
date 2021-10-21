@@ -98,9 +98,9 @@ class Authentication extends StatelessWidget {
         );
       case ApplicationLoginState.register:
         return RegisterForm(
-          email: email!,
+          // email: email!,
           cancel: () {
-            cancelRegistration();
+            cancelLogin();
           },
           registerAccount: (
               email,
@@ -254,9 +254,9 @@ class RegisterForm extends StatefulWidget {
   const RegisterForm({
     required this.registerAccount,
     required this.cancel,
-    required this.email,
+    // this.email='',
   });
-  final String email;
+  final String email = '';
   final void Function(String email, String displayName, String password)
   registerAccount;
   final void Function() cancel;
@@ -352,6 +352,7 @@ class _RegisterFormState extends State<RegisterForm> {
                               _displayNameController.text,
                               _passwordController.text,
                             );
+
                           }
                         },
                         child: const Text('SAVE'),
