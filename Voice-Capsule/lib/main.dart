@@ -188,7 +188,7 @@ class HomeCard extends StatelessWidget {
       ),
       body: Center(
         child: OutlinedButton(
-          child: Text('Logout'),
+          child: Text('LOGOUT'),
           onPressed: () {
             // Logout, then switch back to login page
             ApplicationState().signOut();

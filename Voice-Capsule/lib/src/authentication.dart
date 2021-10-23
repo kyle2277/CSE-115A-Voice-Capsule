@@ -53,30 +53,50 @@ class Authentication extends StatelessWidget {
   Widget build(BuildContext context) {
     switch (loginState) {
       case ApplicationLoginState.loggedOut:
-        return Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 100, bottom: 8),
-              child: StyledButton(
-                onPressed: () {
-                  bool sig = false;
-                  startLoginFlow(sig);
-                },
-                child: const Text('Login'),
-              ),
+        return Scaffold(
+          body: Container(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Placeholder for spacing before more UI elements added
+                SizedBox(
+                  height: 200.00,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.all(10.0),
+                      child: StyledButton(
+                        onPressed: () {
+                          bool sig = false;
+                          startLoginFlow(sig);
+                        },
+                        child: Text('LOGIN'),
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.all(10.0),
+                      child: StyledButton(
+                        onPressed: () {
+                          bool sig = true;
+                          startLoginFlow(sig);
+                        },
+                        child: Text('SIGN-UP'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: 100, bottom: 8),
-              child: StyledButton(
-                onPressed: () {
-                  bool sig = true;
-                  startLoginFlow(sig);
-                },
-                child: const Text('Signup'),
-              ),
-            ),
-          ],
+          ),
         );
+
       case ApplicationLoginState.emailAddress:
         return EmailForm(
             cancel: () {
@@ -192,6 +212,7 @@ class _EmailFormState extends State<EmailForm> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         const Header('Sign in with email'),
         Padding(
@@ -219,14 +240,10 @@ class _EmailFormState extends State<EmailForm> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Padding( //Cancel button
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 16.0, horizontal: 30),
-                      child: TextButton(
+                    TextButton(
                         onPressed: widget.cancel,
-                        child: const Text('Cancel'),
+                        child: const Text('CANCEL'),
                       ),
-                    ),
                     Padding( //Next button
                       padding: const EdgeInsets.symmetric(
                           vertical: 16.0, horizontal: 30),
@@ -279,6 +296,7 @@ class _RegisterFormState extends State<RegisterForm> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         const Header('Create account'),
         Padding(
@@ -444,27 +462,27 @@ class _PasswordFormState extends State<PasswordForm> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      const SizedBox(width: 16),
-
                       TextButton(
                         onPressed: widget.cancel,
-                        child: const Text('Cancel'),
+                        child: const Text('BACK'),
                       ),
-                      StyledButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            widget.login(
-                              _emailController.text,
-                              _passwordController.text,
-                            );
-                            print('LOGIN SUCCESSFUL');
-                            // Switch to home page
-                            widget.navToHome(context);
-                          }
-                        },
-                        child: const Text('SIGN IN'),
+                      Padding( //Next button
+                        padding: const EdgeInsets.symmetric(horizontal: 30),
+                        child: StyledButton(
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              widget.login(
+                                _emailController.text,
+                                _passwordController.text,
+                              );
+                              print('LOGIN SUCCESSFUL');
+                              // Switch to home page
+                              widget.navToHome(context);
+                            }
+                          },
+                          child: const Text('SIGN-IN'),
+                        ),
                       ),
-                      const SizedBox(width: 30),
                     ],
                   ),
                 ),
