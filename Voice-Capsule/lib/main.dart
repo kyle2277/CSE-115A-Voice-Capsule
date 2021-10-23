@@ -52,7 +52,9 @@ class ApplicationState extends ChangeNotifier {
       if (methods.contains('password')) {
         _loginState = ApplicationLoginState.password;
       } else {
-        _loginState = ApplicationLoginState.register;
+        errorCallback(FirebaseAuthException(
+          code:'invalid-email',
+          message: 'This email is does not currently belong to a user account.'));
       }
       _email = email;
       notifyListeners();
@@ -61,18 +63,23 @@ class ApplicationState extends ChangeNotifier {
     }
   }
 
-  void signInWithEmailAndPassword(
-      String email,
-      String password,
-      void Function(FirebaseAuthException e) errorCallback,
-      ) async {
+  Future signInWithEmailAndPassword(
+    String email,
+    String password,
+    void Function(FirebaseAuthException e) errorCallback,
+    ) async {
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
+      return null;
     } on FirebaseAuthException catch (e) {
+      if(e.code == 'wrong-password') {
+        print(e.message);
+      }
       errorCallback(e);
+      return e.message;
     }
   }
 

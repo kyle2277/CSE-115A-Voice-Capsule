@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'widgets.dart';
 
@@ -34,7 +35,7 @@ class Authentication extends StatelessWidget {
       String email,
       void Function(Exception e) error,
       ) verifyEmail;
-  final void Function(
+  final Future Function(
       String email,
       String password,
       void Function(Exception e) error,
@@ -103,7 +104,8 @@ class Authentication extends StatelessWidget {
               cancelLogin();
             },
             callback: (email) => verifyEmail(
-                email, (e) => _showErrorDialog(context, 'Invalid email', e)));
+                  email, (e) => _showErrorDialog(context, 'Invalid email', e))
+        );
       case ApplicationLoginState.password:
         return PasswordForm(
           email: email!,
@@ -111,7 +113,7 @@ class Authentication extends StatelessWidget {
             cancelRegistration();
           },
           login: (email, password) {
-            signInWithEmailAndPassword(email, password,
+            return signInWithEmailAndPassword(email, password,
                     (e) => _showErrorDialog(context, 'Failed to sign in', e));
           },
           navToHome: navToHome,
@@ -136,19 +138,9 @@ class Authentication extends StatelessWidget {
           },
         );
       case ApplicationLoginState.loggedIn:
-        return Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 24, bottom: 8),
-              child: StyledButton(
-                onPressed: () {
-                  signOut();
-                },
-                child: const Text('LOGOUT'),
-              ),
-            ),
-          ],
-        );
+        return Scaffold(
+          backgroundColor: Colors.white,
+          );
       default:
         return Row(
           children: const [
@@ -398,7 +390,7 @@ class PasswordForm extends StatefulWidget {
   final void Function(BuildContext context) navToHome;
   final String email;
   final void Function() cancel;
-  final void Function(String email, String password) login;
+  final Future Function(String email, String password) login;
   @override
   _PasswordFormState createState() => _PasswordFormState();
 }
@@ -469,15 +461,19 @@ class _PasswordFormState extends State<PasswordForm> {
                       Padding( //Next button
                         padding: const EdgeInsets.symmetric(horizontal: 30),
                         child: StyledButton(
-                          onPressed: () {
+                          onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               widget.login(
                                 _emailController.text,
                                 _passwordController.text,
-                              );
-                              print('LOGIN SUCCESSFUL');
-                              // Switch to home page
-                              widget.navToHome(context);
+                              )
+                              .then((result) {
+                                if(result == null) {
+                                  print('LOGIN SUCCESSFUL');
+                                  // Switch to home page
+                                  widget.navToHome(context);
+                                }
+                              });
                             }
                           },
                           child: const Text('SIGN-IN'),
