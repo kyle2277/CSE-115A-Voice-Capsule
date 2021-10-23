@@ -114,21 +114,23 @@ class Authentication extends StatelessWidget {
                     (e) =>
                     _showErrorDialog(context, 'Failed to create account', e));
           },
+          navToHome: navToHome,
         );
       case ApplicationLoginState.loggedIn:
-        return Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 24, bottom: 8),
-              child: StyledButton(
-                onPressed: () {
-                  signOut();
-                },
-                child: const Text('LOGOUT'),
-              ),
-            ),
-          ],
-        );
+        // return Row(
+        //   children: [
+        //     Padding(
+        //       padding: const EdgeInsets.only(left: 24, bottom: 8),
+        //       child: StyledButton(
+        //         onPressed: () {
+        //           signOut();
+        //         },
+        //         child: const Text('This'),
+        //       ),
+        //     ),
+        //   ],
+        // );
+
       default:
         return Row(
           children: const [
@@ -255,7 +257,9 @@ class RegisterForm extends StatefulWidget {
     required this.registerAccount,
     required this.cancel,
     // this.email='',
+    required this.navToHome,
   });
+  final void Function(BuildContext context) navToHome;
   final String email = '';
   final void Function(String email, String displayName, String password)
   registerAccount;
@@ -352,6 +356,8 @@ class _RegisterFormState extends State<RegisterForm> {
                               _displayNameController.text,
                               _passwordController.text,
                             );
+
+                            widget.navToHome(context);
 
                           }
                         },
