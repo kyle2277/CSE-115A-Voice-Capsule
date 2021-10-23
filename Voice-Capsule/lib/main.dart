@@ -112,6 +112,7 @@ class ApplicationState extends ChangeNotifier {
 
   // Navigates to HomeCard, when login successful
   void navToHome(BuildContext context) {
+    // print(_loginState);
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => HomeCard()),

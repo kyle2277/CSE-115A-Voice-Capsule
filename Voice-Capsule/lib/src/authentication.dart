@@ -97,7 +97,6 @@ class Authentication extends StatelessWidget {
             ),
           ),
         );
-
       case ApplicationLoginState.emailAddress:
         return EmailForm(
             cancel: () {
@@ -136,6 +135,7 @@ class Authentication extends StatelessWidget {
                     (e) =>
                     _showErrorDialog(context, 'Failed to create account', e));
           },
+          navToHome: navToHome,
         );
       // case ApplicationLoginState.loggedIn:
       //   navToHome(context);
@@ -263,7 +263,9 @@ class RegisterForm extends StatefulWidget {
     required this.registerAccount,
     required this.cancel,
     // this.email='',
+    required this.navToHome,
   });
+  final void Function(BuildContext context) navToHome;
   final String email = '';
   final void Function(String email, String displayName, String password)
   registerAccount;
@@ -361,6 +363,8 @@ class _RegisterFormState extends State<RegisterForm> {
                               _displayNameController.text,
                               _passwordController.text,
                             );
+
+                            widget.navToHome(context);
 
                           }
                         },
