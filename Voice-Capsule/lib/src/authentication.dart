@@ -137,10 +137,9 @@ class Authentication extends StatelessWidget {
                     _showErrorDialog(context, 'Failed to create account', e));
           },
         );
-      case ApplicationLoginState.loggedIn:
-        return Scaffold(
-          backgroundColor: Colors.white,
-          );
+      // case ApplicationLoginState.loggedIn:
+      //   navToHome(context);
+      //   break;
       default:
         return Row(
           children: const [

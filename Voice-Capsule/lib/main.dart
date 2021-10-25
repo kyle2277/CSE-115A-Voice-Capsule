@@ -15,15 +15,15 @@ class ApplicationState extends ChangeNotifier {
 
   Future<void> init() async {
     await Firebase.initializeApp();
-
-    FirebaseAuth.instance.userChanges().listen((user) {
-      if (user != null) {
-        _loginState = ApplicationLoginState.loggedIn;
-      } else {
-        _loginState = ApplicationLoginState.loggedOut;
-      }
-      notifyListeners();
-    });
+    _loginState = ApplicationLoginState.loggedOut;
+    // FirebaseAuth.instance.userChanges().listen((user) {
+    //   if (user != null) {
+    //     _loginState = ApplicationLoginState.loggedIn;
+    //   } else {
+    //     _loginState = ApplicationLoginState.loggedOut;
+    //   }
+    //   notifyListeners();
+    // });
   }
 
   ApplicationLoginState _loginState = ApplicationLoginState.loggedOut;
@@ -106,6 +106,8 @@ class ApplicationState extends ChangeNotifier {
 
   void signOut() {
     FirebaseAuth.instance.signOut();
+    _loginState = ApplicationLoginState.loggedOut;
+    notifyListeners();
   }
 
   // Navigates to HomeCard, when login successful
