@@ -106,7 +106,7 @@ class Authentication extends StatelessWidget {
                   email, (e) => _showErrorDialog(context, 'Invalid email', e))
         );
       case ApplicationLoginState.password:
-          return PasswordForm(
+        return PasswordForm(
           email: email!,
           cancel: () {
             cancelRegistration();
@@ -118,7 +118,7 @@ class Authentication extends StatelessWidget {
           navToHome: navToHome,
         );
       case ApplicationLoginState.register:
-          return RegisterForm(
+        return RegisterForm(
           // email: email!,
           cancel: () {
             cancelLogin();
