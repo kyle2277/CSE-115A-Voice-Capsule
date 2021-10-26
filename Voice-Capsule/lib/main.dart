@@ -4,7 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_sound/flutter_sound.dart';
 import 'src/authentication.dart';
+import 'src/recorder.dart';
 import 'src/widgets.dart';
 
 // Login functions
@@ -31,6 +33,8 @@ class ApplicationState extends ChangeNotifier {
 
   String? _email;
   String? get email => _email;
+
+  FlutterSoundRecorder? recorder;
 
   void startLoginFlow(bool signup) {
     print(signup);
@@ -106,6 +110,9 @@ class ApplicationState extends ChangeNotifier {
 
   void signOut() {
     FirebaseAuth.instance.signOut();
+    print('closing recorder');
+    SimpleRecorder.closeRecorder(recorder);
+    print('recorder status: $recorder');
     _loginState = ApplicationLoginState.loggedOut;
     notifyListeners();
   }
@@ -197,16 +204,27 @@ class HomeCard extends StatelessWidget {
         backgroundColor: Colors.purple,
       ),
       body: Center(
-        child: OutlinedButton(
-          child: Text('LOGOUT'),
-          onPressed: () {
-            // Logout, then switch back to login page
-            ApplicationState().signOut();
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => LoginCard()));
-          },
+        child: Column (
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Consumer<ApplicationState>(
+              builder: (context, appState, _) => SimpleRecorder(recorder: appState.recorder),
+            ),
+            OutlinedButton(
+              child: Text('LOGOUT'),
+              onPressed: () {
+                // Logout, then switch back to login page
+                ApplicationState().signOut();
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginCard()));
+              },
+            ),
+          ],
         ),
+
+
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
