@@ -34,8 +34,6 @@ class ApplicationState extends ChangeNotifier {
   String? _email;
   String? get email => _email;
 
-  FlutterSoundRecorder? recorder;
-
   void startLoginFlow(bool signup) {
     print(signup);
     if(signup == false){
@@ -110,9 +108,6 @@ class ApplicationState extends ChangeNotifier {
 
   void signOut() {
     FirebaseAuth.instance.signOut();
-    print('closing recorder');
-    SimpleRecorder.closeRecorder(recorder);
-    print('recorder status: $recorder');
     _loginState = ApplicationLoginState.loggedOut;
     notifyListeners();
   }
@@ -125,7 +120,6 @@ class ApplicationState extends ChangeNotifier {
       MaterialPageRoute(builder: (context) => HomeCard()),
     );
   }
-
 }
 
 // Main function
@@ -208,9 +202,7 @@ class HomeCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Consumer<ApplicationState>(
-              builder: (context, appState, _) => SimpleRecorder(recorder: appState.recorder),
-            ),
+            SimpleRecorder(),
             OutlinedButton(
               child: Text('LOGOUT'),
               onPressed: () {
