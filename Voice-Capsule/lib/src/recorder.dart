@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:flutter_sound_platform_interface/flutter_sound_platform_interface.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+import 'utils.dart';
+
+/*
+ * Class for recording audio from device microphone
+ */
 
 class SimpleRecorder extends StatefulWidget {
   @override
@@ -15,14 +22,28 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
   // "?" makes nullable type
   FlutterSoundRecorder? recorder = FlutterSoundRecorder();
   bool _recorderIsInitialized = false;
+  // Monitor for sound level, elapsed time
+  StreamSubscription? _recorderSubscription;
+  // Sound level being recorded
+  double dbLevel = 0;
+  // Path to output file
   var _recorded_url = null;
 
   // Initializing the recorder and the player ----------------------------------
 
   @override
   void initState() {
-    //recorder = FlutterSoundRecorder();
     openRecorder().then((value) {
+      _recorderSubscription = recorder!.onProgress!.listen((e) {
+        setState(() {
+          if(e.decibels != null) {
+            dbLevel = e.decibels as double;
+          } else {
+            dbLevel = 0;
+          }
+        });
+      });
+      recorder!.setSubscriptionDuration(const Duration(milliseconds:100));
       setState(() {
         print('INITIALIZING recorder');
         print(value);
@@ -33,12 +54,24 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
   }
 
   @override
+  // Close recorder
   void dispose() {
+    recorder!.stopRecorder();
+    closeRecorderSubscription();
     recorder!.closeAudioSession();
     recorder = null;
     super.dispose();
   }
 
+  // Cancel monitor of recorder
+  void closeRecorderSubscription() {
+    if(_recorderSubscription != null) {
+      _recorderSubscription!.cancel();
+      _recorderSubscription = null;
+    }
+  }
+
+  // Initialize recorder
   Future<bool> openRecorder() async {
     var status = await Permission.microphone.request();
     if(status != PermissionStatus.granted) {
@@ -54,10 +87,6 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
   }
 
   // Recording and playback ----------------------------------------------------
-
-  void printSomething() {
-    print('HELLO WORLD');
-  }
 
   Future<bool> record() async {
     print('START recording');
@@ -99,43 +128,6 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
     return recorder!.isStopped ? record : stopRecording;
   }
 
-  // Shows "snackbar" style popup with the given message and an OK button
-  // todo Could probably be moved to a utils file at some point
-  void showToast_OK(BuildContext context, String message) {
-    final scaffold = ScaffoldMessenger.of(context);
-    scaffold.showSnackBar(
-      SnackBar(
-        duration: const Duration(seconds:5),
-        behavior: SnackBarBehavior.floating,
-        content: Text(
-            message,
-            textAlign: TextAlign.center
-        ),
-        action: SnackBarAction(
-            label: 'OK',
-            onPressed: scaffold.hideCurrentSnackBar,
-            textColor: Colors.purpleAccent
-        ),
-      ),
-    );
-  }
-
-  // Shows "snackbar" style popup with the given message. Quickyl hides itself
-  // after the given number of seconds
-  void showToast_quick(BuildContext, String message, int time) {
-    final scaffold = ScaffoldMessenger.of(context);
-    scaffold.showSnackBar(
-      SnackBar(
-        duration: Duration(seconds: time),
-        behavior: SnackBarBehavior.floating,
-        content: Text(
-            message,
-            textAlign: TextAlign.center
-        ),
-      ),
-    );
-  }
-
   // Basic Recorder UI
   // todo fix pixel overflow at bottom of screen
   @override
@@ -144,8 +136,27 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
       //mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const SizedBox(
+        Container(
           height: 200,
+          width: 200,
+          alignment: Alignment.bottomCenter,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Rectangle left
+              CustomPaint(
+                // Read as ternary operator
+                painter: recorder!.isRecording ? AudioLevelIndicator(
+                  numBars: 7,
+                  dbLevel: dbLevel,
+                  width: 10.0,
+                  maxHeight: 150.0,
+                  offset: 2.5,
+                  scaleFactor: 0.6,
+                ) : null,
+              ),
+            ],
+          ),
         ),
         IconButton(
           splashRadius: 60,
@@ -156,24 +167,90 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
           onPressed: () {
             getRecorderFunction()!.call().then((value) {
               if(recorder!.isRecording && _recorded_url == null) {
-                showToast_quick(context, 'Started recording', 1);
+                showToast_quick(context, 'Started recording', duration: 1);
               }
               if(recorder!.isStopped && _recorded_url != null) {
-                showToast_quick(context, 'Stopped recording', 1);
+                showToast_quick(context, 'Stopped recording', duration: 1);
                 showToast_OK(context, 'Recording saved to: $_recorded_url');
               }
             });
           },
         ),
         Text(
+          recorder!.isRecording ? 'dB: ${((dbLevel * 100.0).floor() / 100)}' : '',
+          textScaleFactor: 1.25,
+        ),
+        Text(
           recorder!.isRecording ? 'Recording' : 'Record',
           textScaleFactor: 1.5,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        SizedBox(
-          height: 100,
-        ),
       ],
     );
   }
+}
+
+// Class for creating a vertical bar-style audio level indicator
+// Parameter numBars will be made an odd number if passed an even number
+class AudioLevelIndicator extends CustomPainter {
+  AudioLevelIndicator({
+    required this.numBars,
+    required this.dbLevel,
+    required this.width,
+    required this.maxHeight,
+    required this.offset,
+    required this.scaleFactor,
+  });
+
+  // Number of vertical bars in the indicator
+  int numBars;
+  // Source of decibel level
+  double dbLevel;
+  // Fixed width of drawn rectangle
+  double width;
+  // Max height of drawn rectangle
+  double maxHeight;
+  // Horizontal offset of drawn rectangle
+  double offset;
+  // Factor of fallof of outer bar height
+  double scaleFactor;
+
+  // Draws outer bars increasing in height or decreasing
+  // Use named parameter when calling
+  void _drawOuterBars(Canvas canvas, Paint paint, {bool increasing = true}) {
+    int numOuterBars = (numBars / 2.0).floor();
+    for(int i = 1; i <= numOuterBars; i++) {
+      double scaledMaxHeight = (maxHeight / ((1 / scaleFactor) * i));
+      double scaledHeight = (dbLevel * scaledMaxHeight).floor() / maxHeight;
+      double horizontalOffset;
+      if(increasing) {
+        horizontalOffset = (-width/2) - (i * (width + offset));
+      } else {
+        horizontalOffset = (-width/2) + (i * (width + offset));
+      }
+      canvas.drawRect(Offset(horizontalOffset, 0) & Size(width, -(scaledHeight)), paint);
+    }
+  }
+
+  // Draw indicator on UI
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Bar style
+    var paint = Paint()
+        ..color = Colors.grey
+        ..style = PaintingStyle.fill;
+    // Make numBars odd
+    if(numBars % 2 != 1) {
+      numBars += 1;
+    }
+    // Draw outer left bars (increasing in height left to right)
+    _drawOuterBars(canvas, paint, increasing: true);
+    // Draw center bar
+    canvas.drawRect(Offset((-width/2), 0) & Size(width, -((dbLevel * maxHeight).floor() / maxHeight)), paint);
+    // Draw outer right bars
+    _drawOuterBars(canvas, paint, increasing: false);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
 }
