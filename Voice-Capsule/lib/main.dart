@@ -95,14 +95,17 @@ class ApplicationState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void registerAccount(String email, String displayName, String password,
+  // changed to authenticate new accounts modeled after signIn
+  Future registerAccount(String email, String displayName, String password,
       void Function(FirebaseAuthException e) errorCallback) async {
     try {
       var credential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
-      await credential.user!.updateProfile(displayName: displayName);
+      await credential.user!.updateDisplayName(displayName);
+      return null;
     } on FirebaseAuthException catch (e) {
       errorCallback(e);
+      return e.message;
     }
   }
 

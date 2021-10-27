@@ -41,7 +41,7 @@ class Authentication extends StatelessWidget {
       ) signInWithEmailAndPassword;
   final void Function() cancelRegistration;
   final void Function() cancelLogin;
-  final void Function(
+  final Future Function(
       String email,
       String displayName,
       String password,
@@ -127,7 +127,7 @@ class Authentication extends StatelessWidget {
               displayName,
               password,
               ) {
-            registerAccount(
+            return registerAccount(
                 email,
                 displayName,
                 password,
@@ -266,7 +266,7 @@ class RegisterForm extends StatefulWidget {
   });
   final void Function(BuildContext context) navToHome;
   final String email = '';
-  final void Function(String email, String displayName, String password)
+  final Future Function(String email, String displayName, String password)
   registerAccount;
   final void Function() cancel;
   @override
@@ -361,11 +361,16 @@ class _RegisterFormState extends State<RegisterForm> {
                               _emailController.text,
                               _displayNameController.text,
                               _passwordController.text,
-                            );
-
-                            widget.navToHome(context);
+                            ).then((result) {
+                              if(result == null) {
+                                print('LOGIN SUCCESSFUL');
+                                // Switch to home page
+                                widget.navToHome(context);
+                              }
+                            });
 
                           }
+
                         },
                         child: const Text('SAVE'),
                       ),
