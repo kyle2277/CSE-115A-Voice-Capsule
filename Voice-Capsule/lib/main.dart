@@ -73,6 +73,8 @@ class ApplicationState extends ChangeNotifier {
         email: email,
         password: password,
       );
+      // Hack so that LoginCard is in loggedOut state next time signOut() is called
+      _loginState = ApplicationLoginState.loggedOut;
       return null;
     } on FirebaseAuthException catch (e) {
       if(e.code == 'wrong-password') {
@@ -99,15 +101,18 @@ class ApplicationState extends ChangeNotifier {
       var credential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
       await credential.user!.updateProfile(displayName: displayName);
+      // Hack so that LoginCard is in loggedOut state next time signOut() is called
+      // todo check that email is valid (ie not already in use by another account), erroneously transfers to home card after failed registration
+      _loginState = ApplicationLoginState.loggedOut;
     } on FirebaseAuthException catch (e) {
       errorCallback(e);
     }
   }
 
   void signOut() {
+    //_loginState = ApplicationLoginState.loggedOut;
+    // notifyListeners();
     FirebaseAuth.instance.signOut();
-    _loginState = ApplicationLoginState.loggedOut;
-    notifyListeners();
   }
 
   // Navigates to HomeCard, when login successful
@@ -148,6 +153,7 @@ class App extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: const LoginCard(),
+
     );
   }
 }
