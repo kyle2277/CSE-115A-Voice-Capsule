@@ -82,6 +82,13 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
       });
       print('File saved at: ${_recorded_url}');
     });
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SenderScreen()),
+    );
+
+
     return true;
   }
 
@@ -174,6 +181,30 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
           height: 100,
         ),
       ],
+    );
+  }
+}
+
+// Page to send recording and other options
+class SenderScreen extends StatelessWidget {
+  const SenderScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Send Recording"),
+        centerTitle: true,
+        backgroundColor: Colors.purple,
+      ),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+
+          },
+          child: Text('SEND'),
+        ),
+      ),
     );
   }
 }
