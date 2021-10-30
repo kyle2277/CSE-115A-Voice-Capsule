@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:flutter_sound_platform_interface/flutter_sound_platform_interface.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -24,7 +25,7 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
   bool _recorderIsInitialized = false;
   // Monitor for sound level, elapsed time
   StreamSubscription? _recorderSubscription;
-  // Sound level being recorded
+  // Sound level being recorded, range 0-120
   double dbLevel = 0;
   // Path to output file
   var _recorded_url = null;
@@ -143,15 +144,15 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Rectangle left
+              // Visual audio level indicator
               CustomPaint(
                 // Read as ternary operator
                 painter: recorder!.isRecording ? AudioLevelIndicator(
                   numBars: 7,
                   dbLevel: dbLevel,
                   width: 10.0,
-                  maxHeight: 150.0,
                   offset: 2.5,
+                  maxHeight: 200.0,
                   scaleFactor: 0.6,
                 ) : null,
               ),
@@ -196,39 +197,47 @@ class AudioLevelIndicator extends CustomPainter {
   AudioLevelIndicator({
     required this.numBars,
     required this.dbLevel,
-    required this.width,
-    required this.maxHeight,
-    required this.offset,
-    required this.scaleFactor,
+    this.width = 10.0,
+    this.offset = 2.5,
+    this.maxHeight = 150.0,
+    this.scaleFactor = 0.6,
+    this.cornerRadius = 4.0,
   });
 
   // Number of vertical bars in the indicator
   int numBars;
   // Source of decibel level
   double dbLevel;
-  // Fixed width of drawn rectangle
+  // Fixed width of a single drawn rectangle, default value 10.0
   double width;
-  // Max height of drawn rectangle
-  double maxHeight;
-  // Horizontal offset of drawn rectangle
+  // Horizontal offset of drawn rectangles (space between them), default value 2.5
   double offset;
-  // Factor of fallof of outer bar height
+  // Max height of drawn rectangle, default value 100.0
+  double maxHeight;
+  // Factor of falloff of outer bar height, default value 0.5
   double scaleFactor;
+  // Corner radius of bars, default value 2.0
+  double cornerRadius;
+  // Max decibel level
+  final double DB_MAX = 120.0;
 
   // Draws outer bars increasing in height or decreasing
   // Use named parameter when calling
   void _drawOuterBars(Canvas canvas, Paint paint, {bool increasing = true}) {
     int numOuterBars = (numBars / 2.0).floor();
     for(int i = 1; i <= numOuterBars; i++) {
-      double scaledMaxHeight = (maxHeight / ((1 / scaleFactor) * i));
-      double scaledHeight = (dbLevel * scaledMaxHeight).floor() / maxHeight;
+      double scaledMaxHeight = (maxHeight * (pow(scaleFactor, i)));
+      double scaledHeight = (dbLevel * scaledMaxHeight) / DB_MAX;
       double horizontalOffset;
       if(increasing) {
         horizontalOffset = (-width/2) - (i * (width + offset));
       } else {
         horizontalOffset = (-width/2) + (i * (width + offset));
       }
-      canvas.drawRect(Offset(horizontalOffset, 0) & Size(width, -(scaledHeight)), paint);
+      canvas.drawRRect(
+          RRect.fromRectAndRadius(Offset(horizontalOffset, 0) & Size(width, -(scaledHeight)), Radius.circular(cornerRadius)),
+          paint,
+      );
     }
   }
 
@@ -246,8 +255,11 @@ class AudioLevelIndicator extends CustomPainter {
     // Draw outer left bars (increasing in height left to right)
     _drawOuterBars(canvas, paint, increasing: true);
     // Draw center bar
-    canvas.drawRect(Offset((-width/2), 0) & Size(width, -((dbLevel * maxHeight).floor() / maxHeight)), paint);
-    // Draw outer right bars
+    canvas.drawRRect(
+        RRect.fromRectAndRadius(Offset((-width/2), 0) & Size(width, -((dbLevel * maxHeight) / DB_MAX)), Radius.circular(cornerRadius)),
+        paint,
+    );
+    // Draw outer right bars (decreasing in height left to right)
     _drawOuterBars(canvas, paint, increasing: false);
   }
 
