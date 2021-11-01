@@ -27,6 +27,7 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
   StreamSubscription? _recorderSubscription;
   // Sound level being recorded, range 0-120
   double dbLevel = 0;
+  int time =0;
   // Path to output file
   var _recorded_url = null;
 
@@ -37,6 +38,7 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
     openRecorder().then((value) {
       _recorderSubscription = recorder!.onProgress!.listen((e) {
         setState(() {
+          time = e.duration.inMilliseconds;
           if(e.decibels != null) {
             dbLevel = e.decibels as double;
           } else {
@@ -185,6 +187,11 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
           recorder!.isRecording ? 'Recording' : 'Record',
           textScaleFactor: 1.5,
           style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        // Time indicator
+        Text(
+          recorder!.isRecording ? '${(((time)).floor()/1000)}' : '',
+          textScaleFactor: 1.5,
         ),
       ],
     );
