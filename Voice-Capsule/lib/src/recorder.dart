@@ -18,6 +18,10 @@ class SimpleRecorder extends StatefulWidget {
 
 class _SimpleRecorderState extends State<SimpleRecorder> {
 
+  static const int MAX_RECORDING_MINUTES = 1;
+  // min * sec/min * ms/sec = ms
+  static const int MAX_RECORDING_MILLIS = MAX_RECORDING_MINUTES * 60 * 1000;
+  // Audio codec
   Codec _codec = Codec.aacMP4;
   String _filePath = 'recorded_file.mp4';
   // "?" makes nullable type
@@ -27,7 +31,7 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
   StreamSubscription? _recorderSubscription;
   // Sound level being recorded, range 0-120
   double dbLevel = 0;
-  int time =0;
+  int time = 0;
   // Path to output file
   var _recorded_url = null;
 
@@ -39,6 +43,9 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
       _recorderSubscription = recorder!.onProgress!.listen((e) {
         setState(() {
           time = e.duration.inMilliseconds;
+          if(recorder!.isRecording && time >= MAX_RECORDING_MILLIS) {
+            stopRecording();
+          }
           if(e.decibels != null) {
             dbLevel = e.decibels as double;
           } else {
@@ -113,6 +120,10 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
         _recorded_url = value;
       });
       print('File saved at: ${_recorded_url}');
+      if(recorder!.isStopped && _recorded_url != null) {
+        showToast_quick(context, 'Stopped recording', duration: 1);
+        showToast_OK(context, 'Recording saved to: $_recorded_url');
+      }
     });
     return true;
   }
@@ -152,9 +163,9 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
                 painter: recorder!.isRecording ? AudioLevelIndicator(
                   numBars: 7,
                   dbLevel: dbLevel,
-                  width: 10.0,
+                  width: 15.0,
                   offset: 2.5,
-                  maxHeight: 200.0,
+                  maxHeight: 150.0,
                   scaleFactor: 0.6,
                 ) : null,
               ),
@@ -172,25 +183,24 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
               if(recorder!.isRecording && _recorded_url == null) {
                 showToast_quick(context, 'Started recording', duration: 1);
               }
-              if(recorder!.isStopped && _recorded_url != null) {
-                showToast_quick(context, 'Stopped recording', duration: 1);
-                showToast_OK(context, 'Recording saved to: $_recorded_url');
-              }
+              // Recording stopped toast located in stopRecording() function
             });
           },
         ),
-        Text(
-          recorder!.isRecording ? 'dB: ${((dbLevel * 100.0).floor() / 100)}' : '',
-          textScaleFactor: 1.25,
-        ),
+        // Decibel level indicator
+        // Text(
+        //   recorder!.isRecording ? 'dB: ${((dbLevel * 100.0).floor() / 100)}' : '',
+        //   textScaleFactor: 1.25,
+        // ),
+        // Recording text indicator
         Text(
           recorder!.isRecording ? 'Recording' : 'Record',
           textScaleFactor: 1.5,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        // Time indicator
+        // Recording time elapsed indicator
         Text(
-          recorder!.isRecording ? '${(((time)).floor()/1000)}' : '',
+          recorder!.isRecording ? '${millisToTimestamp(time)} / 0$MAX_RECORDING_MINUTES:00.0' : '',
           textScaleFactor: 1.5,
         ),
       ],

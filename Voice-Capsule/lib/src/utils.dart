@@ -40,3 +40,26 @@ void showToast_quick(BuildContext context, String message, {int duration = 2}) {
     ),
   );
 }
+
+final double millisInASecond = 1000;
+final double secondsInAMinute = 60;
+
+// Converts millisecond integer value to a timestamp in the format minutes:seconds.deciseconds
+String millisToTimestamp(int milliseconds) {
+  double totalSeconds = double.parse((milliseconds / millisInASecond).toStringAsFixed(1));
+  int clockMinutesAsInt;
+  if(totalSeconds >= secondsInAMinute) {
+    clockMinutesAsInt = ((totalSeconds - (totalSeconds % secondsInAMinute)) / 60).round();
+  } else {
+    clockMinutesAsInt = 0;
+  }
+  double clockSecondsAsDouble;
+  if (clockMinutesAsInt > 0) {
+    clockSecondsAsDouble = double.parse((totalSeconds - (60 * clockMinutesAsInt)).toStringAsFixed(2));
+  } else {
+    clockSecondsAsDouble = totalSeconds;
+  }
+  String clockSeconds = clockSecondsAsDouble < 10.0 ? '0$clockSecondsAsDouble' : '$clockSecondsAsDouble';
+  String clockMinutes = clockMinutesAsInt < 10 ? '0$clockMinutesAsInt' : '$clockMinutesAsInt';
+  return '$clockMinutes:$clockSeconds';
+}
