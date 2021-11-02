@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:flutter_sound_platform_interface/flutter_sound_platform_interface.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'playback.dart';
 
 class SimpleRecorder extends StatefulWidget {
   @override
@@ -83,11 +84,11 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
       print('File saved at: ${_recorded_url}');
     });
 
+    // Open sending screen
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const SenderScreen()),
     );
-
 
     return true;
   }
@@ -198,13 +199,21 @@ class SenderScreen extends StatelessWidget {
         backgroundColor: Colors.purple,
       ),
       body: Center(
-        child: ElevatedButton(
-          onPressed: () {
+        child: Column (
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SimplePlayback(),
+            OutlinedButton(
+              child: Text('SEND'),
+              onPressed: () {
 
-          },
-          child: Text('SEND'),
+              },
+            ),
+          ],
         ),
-      ),
+        ),
     );
   }
 }
+
