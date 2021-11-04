@@ -197,6 +197,7 @@ class HomeCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            // Widget defined in recorder.dart
             SimpleRecorder(),
             OutlinedButton(
               child: Text('LOGOUT'),
