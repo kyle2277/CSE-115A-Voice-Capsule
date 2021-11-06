@@ -9,6 +9,8 @@ const _audioFilePath = 'recorded_file.mp4';
 typedef Fn = void Function();
 
 class SimplePlayback extends StatefulWidget {
+  const SimplePlayback({Key? key}) : super(key: key);
+
   @override
   _SimplePlaybackState createState() => _SimplePlaybackState();
 }
