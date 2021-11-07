@@ -5,8 +5,7 @@ import 'utils.dart';
 
 // todo remove hardcoding of file path
 const _audioFilePath = 'recorded_file.mp4';
-
-typedef Fn = void Function();
+const double FIVE_SECONDS_IN_MILLIS = 5000;
 
 class SimplePlayback extends StatefulWidget {
   @override
@@ -14,12 +13,13 @@ class SimplePlayback extends StatefulWidget {
 }
 
 class _SimplePlaybackState extends State<SimplePlayback> {
+
   FlutterSoundPlayer? _mPlayer = FlutterSoundPlayer();
   bool _mPlayerIsInited = false;
   // Player time indicator
   int time = 0;
-  // Total length of recording
-  int length = 0;
+  // Length of recording
+  int duration = 0;
   StreamSubscription? _playerSubscription;
 
   @override
@@ -29,13 +29,17 @@ class _SimplePlaybackState extends State<SimplePlayback> {
       _playerSubscription = _mPlayer!.onProgress!.listen((e) {
         setState (() {
           setTime(e.position.inMilliseconds);
-          length = e.duration.inMilliseconds;
+          duration = e.duration.inMilliseconds;
         });
       });
       _mPlayer!.setSubscriptionDuration(const Duration(milliseconds:100));
-      setState(() {
-        _mPlayerIsInited = true;
-        _mPlayer!.setVolume(100.0);
+      setState(() async {
+        _mPlayer!.setVolume(1.0);
+        // Somewhat of a hack to get duration from player subscription
+        startPlayer();
+        await stopPlayer().then((value) {
+          _mPlayerIsInited = true;
+        });
       });
     });
   }
@@ -61,6 +65,9 @@ class _SimplePlaybackState extends State<SimplePlayback> {
 
   // Start playback of specified file
   void startPlayer([filePath = _audioFilePath]) async {
+    if (time == duration) {
+      await seek(0);
+    }
     await _mPlayer!.startPlayer(
         fromURI: filePath,
         codec: Codec.aacMP4,
@@ -91,18 +98,27 @@ class _SimplePlaybackState extends State<SimplePlayback> {
     }
   }
 
+  // Seek to given point in milliseconds
   Future<void> seek(double d) async {
+    bool wasPlaying = _mPlayer!.isPlaying;
     if(!_mPlayer!.isStopped) {
       await stopPlayer();
     }
     int seekTo = d.floor();
+    if(seekTo > duration) {
+      seekTo = duration;
+    }
     await setTime(seekTo);
-    await _mPlayer!.seekToPlayer(Duration(milliseconds: seekTo));
+    _mPlayer!.seekToPlayer(Duration(milliseconds: seekTo)).then((value) {
+      if (time != duration && wasPlaying) {
+        startPlayer();
+      }
+    });
   }
 
   // --------------------- UI -------------------
 
-  Fn? getPlaybackFn() {
+  void Function()? getPlaybackFn() {
     if (!_mPlayerIsInited) {
       return null;
     }
@@ -117,17 +133,12 @@ class _SimplePlaybackState extends State<SimplePlayback> {
         pausePlayer().then((value) => setState(() {}));
       };
     }
-    // return _mPlayer!.isStopped
-    //     ? startPlayer
-    //     : () {
-    //   stopPlayer().then((value) => setState(() {}));
-    // };
   }
 
   // Sets position of track playback
   Future<void> setTime(int d) async {
-    if (d > length) {
-      d = length;
+    if (d > duration) {
+      d = duration;
     } else if (d < 0) {
       d = 0;
     }
@@ -150,6 +161,16 @@ class _SimplePlaybackState extends State<SimplePlayback> {
     }
   }
 
+  Icon getPlayIcon() {
+    if (!_mPlayerIsInited) {
+      return Icon(Icons.play_arrow);
+    } else if (_mPlayer!.isPlaying) {
+      return Icon(Icons.pause);
+    } else {
+      return Icon(Icons.play_arrow);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column (
@@ -164,7 +185,7 @@ class _SimplePlaybackState extends State<SimplePlayback> {
               splashRadius: 20,
               color:Colors.grey,
               icon: Icon(Icons.fast_rewind),
-              tooltip: 'Seek to start',
+              tooltip: 'Restart',
               onPressed: () {
                 seek(0);
               },
@@ -175,14 +196,14 @@ class _SimplePlaybackState extends State<SimplePlayback> {
               icon: Icon(Icons.replay_5),
               tooltip: 'Go back 5 seconds',
               onPressed: () {
-                seek(time - 5000);
+                seek(time - FIVE_SECONDS_IN_MILLIS);
               }
             ),
             IconButton(
               splashRadius: 40,
               iconSize: 80.0,
               color: Colors.grey,
-              icon: _mPlayer!.isPlaying ? Icon(Icons.pause) : Icon(Icons.play_arrow),
+              icon: getPlayIcon(),
               tooltip: _mPlayer!.isPlaying ? 'Tap to pause' : 'Tap to play',
               onPressed: getPlaybackFn(),
             ),
@@ -192,7 +213,7 @@ class _SimplePlaybackState extends State<SimplePlayback> {
               icon: Icon(Icons.forward_5),
               tooltip: 'Go forward 5 seconds',
               onPressed: () {
-                seek(time + 5000);
+                seek(time + FIVE_SECONDS_IN_MILLIS);
               }
             ),
             IconButton(
@@ -202,62 +223,24 @@ class _SimplePlaybackState extends State<SimplePlayback> {
               tooltip: 'Stop',
               onPressed: () {
                 stopPlayer().then((value) => setState(() {
-                  setTime(0);
+                  seek(0);
                 }));
               }
             ),
           ]
         ),
-        // Text(
-        //   getPlaybackTextStatus(),
-        //   textScaleFactor: 1.5,
-        //   style: const TextStyle(fontWeight: FontWeight.bold),
-        // ),
         Text(
-          '${millisToTimestamp(time)} / ${millisToTimestamp(length)}',
+          '${millisToTimestamp(time)} / ${millisToTimestamp(duration)}',
           textScaleFactor: 1.25,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         Slider(
           value: time + 0.0,
           min: 0.0,
-          max: length + 0.0,
+          max: duration + 0.0,
           onChanged: seek,
         ),
       ],
     );
-
-    // return Column(
-    //   children: [
-    //     Container(
-    //       margin: const EdgeInsets.all(3),
-    //       padding: const EdgeInsets.all(3),
-    //       height: 80,
-    //       width: double.infinity,
-    //       alignment: Alignment.center,
-    //       decoration: BoxDecoration(
-    //         color: Color(0xFFFAF0E6),
-    //         border: Border.all(
-    //           color: Colors.indigo,
-    //           width: 3,
-    //         ),
-    //       ),
-    //       child: Row(children: [
-    //         ElevatedButton(
-    //           onPressed: getPlaybackFn(),
-    //           //color: Colors.white,
-    //           //disabledColor: Colors.grey,
-    //           child: Text(_mPlayer!.isPlaying ? 'Stop' : 'Play'),
-    //         ),
-    //         SizedBox(
-    //           width: 20,
-    //         ),
-    //         Text(_mPlayer!.isPlaying
-    //             ? 'Playback in progress'
-    //             : 'Player is stopped'),
-    //       ]),
-    //     ),
-    //   ],
-    // );
   }
 }
