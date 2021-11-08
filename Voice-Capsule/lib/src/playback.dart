@@ -64,7 +64,7 @@ class _SimplePlaybackState extends State<SimplePlayback> {
   // -------  Here is the code to playback a remote file -----------------------
 
   // Start playback of specified file
-  void startPlayer([filePath = _audioFilePath]) async {
+  Future<void> startPlayer([filePath = _audioFilePath]) async {
     if (time == duration) {
       await seek(0);
     }
@@ -119,11 +119,13 @@ class _SimplePlaybackState extends State<SimplePlayback> {
   // --------------------- UI -------------------
 
   void Function()? getPlaybackFn() {
-    if (!_mPlayerIsInited) {
+    if(!_mPlayerIsInited) {
       return null;
     }
     if(_mPlayer!.isStopped) {
-      return startPlayer;
+      return () {
+        startPlayer().then((value) => setState (() {}));
+      };
     } else if (_mPlayer!.isPaused) {
       return () {
         resumePlayer().then((value) => setState(() {}));
