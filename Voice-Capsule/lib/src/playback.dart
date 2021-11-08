@@ -8,7 +8,7 @@ const _audioFilePath = 'recorded_file.mp4';
 const double FIVE_SECONDS_IN_MILLIS = 5000;
 
 class SimplePlayback extends StatefulWidget {
-  const SimplePlayback({Key? key}) : super(key: key);
+  //const SimplePlayback({Key? key}) : super(key: key);
 
   @override
   _SimplePlaybackState createState() => _SimplePlaybackState();
@@ -26,6 +26,7 @@ class _SimplePlaybackState extends State<SimplePlayback> {
 
   @override
   void initState() {
+    print("RUNNING INIT");
     super.initState();
     _mPlayer!.openAudioSession().then((value) {
       _playerSubscription = _mPlayer!.onProgress!.listen((e) {
@@ -41,6 +42,7 @@ class _SimplePlaybackState extends State<SimplePlayback> {
         startPlayer();
         await stopPlayer().then((value) {
           _mPlayerIsInited = true;
+          print("PLAYER IS INITED");
         });
       });
     });

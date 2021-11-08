@@ -293,20 +293,19 @@ class CapsulesWidget extends StatelessWidget {
           Container(
               height: 100,
               decoration: BoxDecoration(
-                color : Colors.purple,
-                borderRadius : BorderRadius.circular(15),
-              ),
-              child: const Center(
-                  child : Text('Capsule 2',
-                      textAlign : TextAlign.center,
-                      style : TextStyle(
-                        color : Colors.white,
-                        fontSize : 50.0,
-                      )
-                  )
+              color : Colors.purple,
+              borderRadius : BorderRadius.circular(15),
+            ),
+            child: const Center(
+              child : Text('Capsule 2',
+                textAlign : TextAlign.center,
+                style : TextStyle(
+                  color : Colors.white,
+                  fontSize : 50.0,
+                )
               )
+            )
           ),
-
         ]
       )
     );
