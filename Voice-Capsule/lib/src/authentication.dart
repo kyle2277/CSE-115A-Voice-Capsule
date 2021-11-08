@@ -141,8 +141,8 @@ class Authentication extends StatelessWidget {
           navToHome: navToHome,
         );
       // case ApplicationLoginState.loggedIn:
-      //   navToHome(context);
-      //   break;
+      //   return Scaffold();
+      //   //navToHome(context);
       default:
         return Row(
           children: const [
@@ -482,6 +482,7 @@ class _PasswordFormState extends State<PasswordForm> {
                                 if(result == null) {
                                   print('LOGIN SUCCESSFUL');
                                   // Switch to home page
+
                                   widget.navToHome(context);
                                 }
                               });
