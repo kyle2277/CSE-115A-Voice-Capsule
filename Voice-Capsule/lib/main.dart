@@ -4,7 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_sound/flutter_sound.dart';
 import 'src/authentication.dart';
+import 'src/recorder.dart';
+import 'src/playback.dart';
 import 'src/widgets.dart';
 
 // Login functions
@@ -16,14 +19,6 @@ class ApplicationState extends ChangeNotifier {
   Future<void> init() async {
     await Firebase.initializeApp();
     _loginState = ApplicationLoginState.loggedOut;
-    // FirebaseAuth.instance.userChanges().listen((user) {
-    //   if (user != null) {
-    //     _loginState = ApplicationLoginState.loggedIn;
-    //   } else {
-    //     _loginState = ApplicationLoginState.loggedOut;
-    //   }
-    //   notifyListeners();
-    // });
   }
 
   ApplicationLoginState _loginState = ApplicationLoginState.loggedOut;
@@ -95,17 +90,18 @@ class ApplicationState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void registerAccount(String email, String displayName, String password,
+  // changed to authenticate new accounts modeled after signIn
+  Future registerAccount(String email, String displayName, String password,
       void Function(FirebaseAuthException e) errorCallback) async {
     try {
       var credential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
-      await credential.user!.updateProfile(displayName: displayName);
-      // Hack so that LoginCard is in loggedOut state next time signOut() is called
+      await credential.user!.updateDisplayName(displayName);
       // todo check that email is valid (ie not already in use by another account), erroneously transfers to home card after failed registration
       _loginState = ApplicationLoginState.loggedOut;
     } on FirebaseAuthException catch (e) {
       errorCallback(e);
+      return e.message;
     }
   }
 
@@ -123,7 +119,6 @@ class ApplicationState extends ChangeNotifier {
       MaterialPageRoute(builder: (context) => HomeCard()),
     );
   }
-
 }
 
 // Main function
@@ -166,7 +161,7 @@ class LoginCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Login to Voice Capsule'),
+        title: const Text('Login to Voice Capsule'),
         centerTitle: true,
         backgroundColor: Colors.purple,
       ),
@@ -191,30 +186,35 @@ class LoginCard extends StatelessWidget {
 }
 
 // Home definition
-class HomeCard extends StatelessWidget {
+// Ricardo on 11/6: made this Stateful to be able to handle navBar
+class HomeCard extends StatefulWidget {
   const HomeCard({Key? key}) : super(key: key);
+
+  @override
+  _HomeCardState createState() => _HomeCardState();
+}
+
+// Changing Home Card based on navBar
+class _HomeCardState extends State<HomeCard>{
+  static int _currentIndex = 0; // initial index of bottom nav
+  final List _children = [
+    const RecordWidget(),
+    const CapsulesWidget(),
+  ]; // list of widgets to be displayed
+  static int _numCapsules = 1; // set at one for now until we figure out multiple notes
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Voice Capsule Test'),
+        title: const Text('Voice Capsule Test'),
         centerTitle: true,
         backgroundColor: Colors.purple,
       ),
-      body: Center(
-        child: OutlinedButton(
-          child: Text('LOGOUT'),
-          onPressed: () {
-            // Logout, then switch back to login page
-            ApplicationState().signOut();
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => LoginCard()));
-          },
-        ),
-      ),
+      body:  _children[_currentIndex], // Selected widget will be shown
       bottomNavigationBar: BottomNavigationBar(
+        onTap: onTabTapped, // function for switching tabs
+        currentIndex: _currentIndex, // index of currently selected tab
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.mic),
@@ -228,6 +228,86 @@ class HomeCard extends StatelessWidget {
         backgroundColor: Colors.grey[200],
         selectedItemColor: Colors.purple,
       ),
+    );
+  }
+
+  void onTabTapped(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
+}
+
+// Recording Screen slide
+// Ricardo on 11/6: Part of the change of making LoginCard stateless
+class RecordWidget extends StatelessWidget {
+  const RecordWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column (
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Widget defined in recorder.dart
+            SimpleRecorder(),
+            OutlinedButton(
+              child: const Text('LOGOUT'),
+              onPressed: () {
+                // Logout, then switch back to login page
+                ApplicationState().signOut();
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginCard()));
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Capsules Slide
+// Ricardo on 11/6: Part of the change of making LoginCard stateless
+class CapsulesWidget extends StatelessWidget {
+  const CapsulesWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: ListWheelScrollView(
+        itemExtent: 280,
+        children: [
+          Container(
+            height: 100,
+            decoration: BoxDecoration(
+              color : Colors.purple,
+              borderRadius : BorderRadius.circular(15),
+            ),
+            child: SimplePlayback(),
+          ),
+          Container(
+              height: 100,
+              decoration: BoxDecoration(
+              color : Colors.purple,
+              borderRadius : BorderRadius.circular(15),
+            ),
+            child: const Center(
+              child : Text('Capsule 2',
+                textAlign : TextAlign.center,
+                style : TextStyle(
+                  color : Colors.white,
+                  fontSize : 50.0,
+                )
+              )
+            )
+          ),
+        ]
+      )
     );
   }
 }

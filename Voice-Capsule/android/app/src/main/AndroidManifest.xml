@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.ucsc.voice_capsule">
-   <application
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <application
         android:label="voice_capsule"
         android:icon="@mipmap/ic_launcher">
         <activity
