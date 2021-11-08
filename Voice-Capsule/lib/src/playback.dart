@@ -8,6 +8,8 @@ const _audioFilePath = 'recorded_file.mp4';
 const double FIVE_SECONDS_IN_MILLIS = 5000;
 
 class SimplePlayback extends StatefulWidget {
+  const SimplePlayback({Key? key}) : super(key: key);
+
   @override
   _SimplePlaybackState createState() => _SimplePlaybackState();
 }
