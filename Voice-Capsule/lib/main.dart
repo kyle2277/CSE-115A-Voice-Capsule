@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'src/authentication.dart';
 import 'src/recorder.dart';
+import 'src/capsules.dart';
 import 'src/playback.dart';
 import 'src/widgets.dart';
 
@@ -199,7 +200,7 @@ class _HomeCardState extends State<HomeCard>{
   static int _currentIndex = 0; // initial index of bottom nav
   final List _children = [
     const RecordWidget(),
-    const CapsulesWidget(),
+    const CapsulesSlide(),
   ]; // list of widgets to be displayed
   static int _numCapsules = 1; // set at one for now until we figure out multiple notes
 
@@ -239,7 +240,7 @@ class _HomeCardState extends State<HomeCard>{
 }
 
 // Recording Screen slide
-// Ricardo on 11/6: Part of the change of making LoginCard stateless
+// Ricardo on 11/6: Part of the change of making LoginCard stateful
 class RecordWidget extends StatelessWidget {
   const RecordWidget({Key? key}) : super(key: key);
 
@@ -266,48 +267,6 @@ class RecordWidget extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-// Capsules Slide
-// Ricardo on 11/6: Part of the change of making LoginCard stateless
-class CapsulesWidget extends StatelessWidget {
-  const CapsulesWidget({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: ListWheelScrollView(
-        itemExtent: 280,
-        children: [
-          Container(
-            height: 100,
-            decoration: BoxDecoration(
-              color : Colors.purple,
-              borderRadius : BorderRadius.circular(15),
-            ),
-            child: SimplePlayback(),
-          ),
-          Container(
-              height: 100,
-              decoration: BoxDecoration(
-              color : Colors.purple,
-              borderRadius : BorderRadius.circular(15),
-            ),
-            child: const Center(
-              child : Text('Capsule 2',
-                textAlign : TextAlign.center,
-                style : TextStyle(
-                  color : Colors.white,
-                  fontSize : 50.0,
-                )
-              )
-            )
-          ),
-        ]
-      )
     );
   }
 }
