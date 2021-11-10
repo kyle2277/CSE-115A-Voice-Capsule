@@ -4,6 +4,9 @@ import 'dart:math';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:flutter_sound_platform_interface/flutter_sound_platform_interface.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:intl/intl.dart';
+import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
+import 'date_time_picker.dart';
 import 'playback.dart';
 
 import 'utils.dart';
@@ -130,7 +133,7 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
     // Open sending screen
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const SenderScreen()),
+      MaterialPageRoute(builder: (context) => SenderScreen()),
     );
 
     return true;
@@ -217,8 +220,15 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
 }
 
 // Page to send recording and other options
-class SenderScreen extends StatelessWidget {
-  const SenderScreen({Key? key}) : super(key: key);
+class SenderScreen extends StatefulWidget {
+  DateTime currentSelection = DateTime.now();
+  final dateTimeFormat = DateFormat("MM-dd-yyyy, hh:mm a");
+  @override
+  _SenderScreenState createState() => _SenderScreenState();
+}
+
+class _SenderScreenState extends State<SenderScreen> {
+  //const SenderScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -234,6 +244,44 @@ class SenderScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SimplePlayback(),
+            //BasicDateTimeField(currentSelection: widget.currentSelection),
+            DateTimeField(
+              format: widget.dateTimeFormat,
+              onShowPicker: (context, currentValue) async {
+                final date = await showDatePicker(
+                    context: context,
+                    firstDate: DateTime(1900),
+                    initialDate: currentValue ?? DateTime.now(),
+                    lastDate: DateTime(2100));
+                if (date != null) {
+                  final time = await showTimePicker(
+                    context: context,
+                    initialTime:
+                    TimeOfDay.fromDateTime(currentValue ?? DateTime.now()),
+                  );
+                  DateTime fieldValue = DateTimeField.combine(date, time);
+                  setState(() {
+                    widget.currentSelection = fieldValue;
+                  });
+                  return fieldValue;
+                } else {
+                  setState(() {
+                    widget.currentSelection = currentValue ?? DateTime.now();
+                  });
+                  return currentValue;
+                }
+              },
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Text(
+              'Selected date: ${widget.dateTimeFormat.format(widget.currentSelection)}',
+              textScaleFactor: 1.5,
+            ),
+            SizedBox(
+              height: 10,
+            ),
             OutlinedButton(
               child: Text('SEND'),
               onPressed: () {
@@ -242,7 +290,7 @@ class SenderScreen extends StatelessWidget {
             ),
           ],
         ),
-        ),
+      ),
     );
   }
 }
