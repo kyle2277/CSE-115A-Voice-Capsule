@@ -221,7 +221,7 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
 
 // Page to send recording and other options
 class SenderScreen extends StatefulWidget {
-  DateTime currentSelection = DateTime.now();
+  DateTime? currentSelection;
   final dateTimeFormat = DateFormat("MM-dd-yyyy, hh:mm a");
   @override
   _SenderScreenState createState() => _SenderScreenState();
@@ -276,7 +276,7 @@ class _SenderScreenState extends State<SenderScreen> {
               height: 10,
             ),
             Text(
-              'Selected date: ${widget.dateTimeFormat.format(widget.currentSelection)}',
+              'Selected date: ${widget.currentSelection != null ? widget.dateTimeFormat.format(widget.currentSelection!) : ""}',
               textScaleFactor: 1.5,
             ),
             SizedBox(
