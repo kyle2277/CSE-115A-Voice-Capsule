@@ -53,7 +53,7 @@ class PlaybackScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Play Recording"),
+        title: const Text("Play Recording"),
         centerTitle: true,
         backgroundColor: Colors.purple,
       ),

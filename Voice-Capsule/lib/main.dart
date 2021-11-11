@@ -202,7 +202,6 @@ class _HomeCardState extends State<HomeCard>{
     const RecordWidget(),
     const CapsulesSlide(),
   ]; // list of widgets to be displayed
-  static int _numCapsules = 1; // set at one for now until we figure out multiple notes
 
   @override
   Widget build(BuildContext context) {
@@ -225,6 +224,11 @@ class _HomeCardState extends State<HomeCard>{
             icon: Icon(Icons.list),
             label: 'Capsules',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.arrow_back_rounded),
+            label: 'LOGOUT',
+          ),
+
         ],
         backgroundColor: Colors.grey[200],
         selectedItemColor: Colors.purple,
@@ -234,7 +238,15 @@ class _HomeCardState extends State<HomeCard>{
 
   void onTabTapped(int index) {
     setState(() {
-      _currentIndex = index;
+      if(index == 2){ // If logging out nav to loginCard
+        ApplicationState().signOut();
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginCard()));
+      } else{
+        _currentIndex = index;
+      }
+
     });
   }
 }
@@ -254,16 +266,6 @@ class RecordWidget extends StatelessWidget {
           children: [
             // Widget defined in recorder.dart
             SimpleRecorder(),
-            OutlinedButton(
-              child: const Text('LOGOUT'),
-              onPressed: () {
-                // Logout, then switch back to login page
-                ApplicationState().signOut();
-                Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginCard()));
-              },
-            ),
           ],
         ),
       ),
