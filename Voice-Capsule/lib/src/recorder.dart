@@ -16,6 +16,11 @@ import 'utils.dart';
  */
 
 class SimpleRecorder extends StatefulWidget {
+  SimpleRecorder({
+    required this.contacts,
+  });
+  // User contacts
+  var contacts;
   @override
   _SimpleRecorderState createState() => _SimpleRecorderState();
 }
@@ -37,7 +42,7 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
   double dbLevel = 0;
   int time = 0;
   // Path to output file
-  var _recorded_url = null;
+  var _recordedUrl = null;
 
   // Initializing the recorder and the player ----------------------------------
 
@@ -105,7 +110,7 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
   Future<bool> record() async {
     print('START recording');
     // Clear path to last recorded file
-    _recorded_url = null;
+    _recordedUrl = null;
     await recorder!.startRecorder(
       toFile: _filePath,
       codec: _codec,
@@ -121,19 +126,19 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
     print('STOP recording');
     await recorder!.stopRecorder().then((value) {
       setState(() {
-        _recorded_url = value;
+        _recordedUrl = value;
       });
-      print('File saved at: ${_recorded_url}');
-      if(recorder!.isStopped && _recorded_url != null) {
+      print('File saved at: ${_recordedUrl}');
+      if(recorder!.isStopped && _recordedUrl != null) {
         showToast_quick(context, 'Stopped recording', duration: 1);
-        showToast_OK(context, 'Recording saved to: $_recorded_url');
+        showToast_OK(context, 'Recording saved to: $_recordedUrl');
       }
     });
 
     // Open sending screen
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => SenderScreen()),
+      MaterialPageRoute(builder: (context) => SenderScreen(contacts: widget.contacts, audioFileUrl: _recordedUrl)),
     );
 
     return true;
@@ -191,7 +196,7 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
           tooltip: recorder!.isRecording ? 'Tap to stop recording' : 'Tap to start recording',
           onPressed: () {
             getRecorderFunction()!.call().then((value) {
-              if(recorder!.isRecording && _recorded_url == null) {
+              if(recorder!.isRecording && _recordedUrl == null) {
                 showToast_quick(context, 'Started recording', duration: 1);
               }
               // Recording stopped toast located in stopRecording() function
@@ -221,14 +226,32 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
 
 // Page to send recording and other options
 class SenderScreen extends StatefulWidget {
+  SenderScreen({
+    required this.contacts,
+    required this.audioFileUrl,
+  });
+  // List of contacts
+  var contacts;
+  String audioFileUrl;
+  // Date/time selection
   DateTime? currentSelection;
+  // Recipient selection
+  String? recipient;
   final dateTimeFormat = DateFormat("MM-dd-yyyy, hh:mm a");
+
   @override
   _SenderScreenState createState() => _SenderScreenState();
 }
 
 class _SenderScreenState extends State<SenderScreen> {
   //const SenderScreen({Key? key}) : super(key: key);
+
+  @override
+  @mustCallSuper
+  void initState() {
+    widget.recipient = widget.contacts[0];
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -243,7 +266,7 @@ class _SenderScreenState extends State<SenderScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SimplePlayback(),
+            SimplePlayback(audioFileUrl: widget.audioFileUrl),
             //BasicDateTimeField(currentSelection: widget.currentSelection),
             DateTimeField(
               format: widget.dateTimeFormat,
@@ -281,6 +304,47 @@ class _SenderScreenState extends State<SenderScreen> {
             ),
             SizedBox(
               height: 10,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Select recipient:',
+                  textScaleFactor: 1.5,
+                ),
+                SizedBox(
+                  width: 10.0,
+                ),
+                DropdownButton<String>(
+                  value: widget.recipient,
+                  icon: const Icon(Icons.arrow_downward),
+                  iconSize: 24,
+                  elevation: 16,
+                  style: const TextStyle(
+                      color: Colors.purple,
+                  ),
+                  underline: Container(
+                    height: 2,
+                    color: Colors.purple,
+                  ),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      widget.recipient = newValue!;
+                    });
+                  },
+                  items: widget.contacts
+                      .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(
+                            value,
+                            textScaleFactor: 1.5,
+                          ),
+                        );
+                      })
+                      .toList(),
+                ),
+              ]
             ),
             OutlinedButton(
               child: Text('SEND'),

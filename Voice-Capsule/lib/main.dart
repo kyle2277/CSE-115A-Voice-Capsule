@@ -10,6 +10,9 @@ import 'src/recorder.dart';
 import 'src/playback.dart';
 import 'src/widgets.dart';
 
+// Info for currently signed in user
+User? firebase_user;
+
 // Login functions
 class ApplicationState extends ChangeNotifier {
   ApplicationState() {
@@ -67,7 +70,9 @@ class ApplicationState extends ChangeNotifier {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
-      );
+      ).then((value) {
+        firebase_user = FirebaseAuth.instance.currentUser;
+      });
       // Hack so that LoginCard is in loggedOut state next time signOut() is called
       _loginState = ApplicationLoginState.loggedOut;
       return null;
@@ -95,7 +100,9 @@ class ApplicationState extends ChangeNotifier {
       void Function(FirebaseAuthException e) errorCallback) async {
     try {
       var credential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: email, password: password);
+          .createUserWithEmailAndPassword(email: email, password: password).then((value) {
+        firebase_user = FirebaseAuth.instance.currentUser;
+      });
       await credential.user!.updateDisplayName(displayName);
       // todo check that email is valid (ie not already in use by another account), erroneously transfers to home card after failed registration
       _loginState = ApplicationLoginState.loggedOut;
@@ -207,7 +214,11 @@ class _HomeCardState extends State<HomeCard>{
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Voice Capsule Test'),
+        title: const Text(
+          'Voice Capsule Test',
+          //'User ID: ${firebase_user?.uid ?? 'none'}',
+          //textScaleFactor: 0.75,
+        ),
         centerTitle: true,
         backgroundColor: Colors.purple,
       ),
@@ -252,7 +263,7 @@ class RecordWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Widget defined in recorder.dart
-            SimpleRecorder(),
+            SimpleRecorder(contacts: <String>['Myself','Contact 1','Contact 2','Contact 3']),
             OutlinedButton(
               child: const Text('LOGOUT'),
               onPressed: () {
@@ -274,7 +285,8 @@ class RecordWidget extends StatelessWidget {
 // Ricardo on 11/6: Part of the change of making LoginCard stateless
 class CapsulesWidget extends StatelessWidget {
   const CapsulesWidget({Key? key}) : super(key: key);
-
+  // TODO: replace hardcoded audio file with list of recordings
+  final String audioFileUrl = 'recorded_file.mp4';
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -288,7 +300,7 @@ class CapsulesWidget extends StatelessWidget {
               color : Colors.purple,
               borderRadius : BorderRadius.circular(15),
             ),
-            child: SimplePlayback(),
+            child: SimplePlayback(audioFileUrl: audioFileUrl),
           ),
           Container(
               height: 100,
