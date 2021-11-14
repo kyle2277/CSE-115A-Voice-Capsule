@@ -63,12 +63,6 @@ class PlaybackScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SimplePlayback(),
-            // OutlinedButton(
-            //   child: Text('SEND'),
-            //   onPressed: () {
-            //
-            //   },
-            // ),
           ],
         ),
       ),

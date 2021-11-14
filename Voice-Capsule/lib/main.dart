@@ -8,6 +8,7 @@ import 'package:flutter_sound/flutter_sound.dart';
 import 'src/authentication.dart';
 import 'src/recorder.dart';
 import 'src/capsules.dart';
+import 'src/contacts.dart';
 import 'src/playback.dart';
 import 'src/widgets.dart';
 
@@ -197,10 +198,11 @@ class HomeCard extends StatefulWidget {
 
 // Changing Home Card based on navBar
 class _HomeCardState extends State<HomeCard>{
-  static int _currentIndex = 0; // initial index of bottom nav
+  int _currentIndex = 0; // initial index of bottom nav
   final List _children = [
     const RecordWidget(),
     const CapsulesSlide(),
+    const ContactsSlide(),
   ]; // list of widgets to be displayed
 
   @override
@@ -213,6 +215,7 @@ class _HomeCardState extends State<HomeCard>{
       ),
       body:  _children[_currentIndex], // Selected widget will be shown
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed, // keeps color fixed
         onTap: onTabTapped, // function for switching tabs
         currentIndex: _currentIndex, // index of currently selected tab
         items: const <BottomNavigationBarItem>[
@@ -225,10 +228,13 @@ class _HomeCardState extends State<HomeCard>{
             label: 'Capsules',
           ),
           BottomNavigationBarItem(
+            icon: Icon(Icons.contacts),
+            label: 'Contacts',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.arrow_back_rounded),
             label: 'LOGOUT',
           ),
-
         ],
         backgroundColor: Colors.grey[200],
         selectedItemColor: Colors.purple,
@@ -238,7 +244,7 @@ class _HomeCardState extends State<HomeCard>{
 
   void onTabTapped(int index) {
     setState(() {
-      if(index == 2){ // If logging out nav to loginCard
+      if(index == 3){ // If logging out nav to loginCard
         ApplicationState().signOut();
         Navigator.pushReplacement(
             context,
@@ -246,7 +252,6 @@ class _HomeCardState extends State<HomeCard>{
       } else{
         _currentIndex = index;
       }
-
     });
   }
 }
