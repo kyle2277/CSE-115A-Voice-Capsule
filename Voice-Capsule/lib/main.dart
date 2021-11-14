@@ -9,6 +9,7 @@ import 'src/authentication.dart';
 import 'src/recorder.dart';
 import 'src/playback.dart';
 import 'src/widgets.dart';
+import 'src/body.dart';
 
 // Info for currently signed in user
 User? firebase_user;
@@ -207,6 +208,7 @@ class _HomeCardState extends State<HomeCard>{
   final List _children = [
     const RecordWidget(),
     const CapsulesWidget(),
+    const FriendsWidget(),
   ]; // list of widgets to be displayed
   static int _numCapsules = 1; // set at one for now until we figure out multiple notes
 
@@ -234,6 +236,10 @@ class _HomeCardState extends State<HomeCard>{
           BottomNavigationBarItem(
             icon: Icon(Icons.list),
             label: 'Capsules',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_search_rounded),
+            label: 'Friends',
           ),
         ],
         backgroundColor: Colors.grey[200],
@@ -323,3 +329,18 @@ class CapsulesWidget extends StatelessWidget {
     );
   }
 }
+
+class FriendsWidget extends StatelessWidget {
+  const FriendsWidget({Key? key}) : super(key: key);
+  @override
+  Widget build(BuildContext context){
+    return Scaffold(
+      appBar:  AppBar(
+        title: Text("Profile"),
+        centerTitle: true,
+      ),
+      body: Body()
+    );
+  }
+}
+
