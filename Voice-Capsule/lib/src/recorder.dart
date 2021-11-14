@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'date_time_picker.dart';
 import 'playback.dart';
+import 'dart:collection';
 
 import 'utils.dart';
 
@@ -20,7 +21,7 @@ class SimpleRecorder extends StatefulWidget {
     required this.contacts,
   });
   // User contacts
-  var contacts;
+  LinkedHashMap<String, String> contacts;
   @override
   _SimpleRecorderState createState() => _SimpleRecorderState();
 }
@@ -231,10 +232,11 @@ class SenderScreen extends StatefulWidget {
     required this.audioFileUrl,
   });
   // List of contacts
-  var contacts;
+  LinkedHashMap<String, String> contacts;
+  List<String>? contactsNameList;
   String audioFileUrl;
   // Date/time selection
-  DateTime? currentSelection;
+  DateTime? currentDateTimeSelection;
   // Recipient selection
   String? recipient;
   final dateTimeFormat = DateFormat("MM-dd-yyyy, hh:mm a");
@@ -249,7 +251,13 @@ class _SenderScreenState extends State<SenderScreen> {
   @override
   @mustCallSuper
   void initState() {
-    widget.recipient = widget.contacts[0];
+    widget.contactsNameList = <String>["Myself"];
+    for (String username in widget.contacts.keys) {
+      if(username != "Myself") {
+        widget.contactsNameList!.add(username);
+      }
+    }
+    widget.recipient = widget.contactsNameList![0];
     super.initState();
   }
 
@@ -284,12 +292,12 @@ class _SenderScreenState extends State<SenderScreen> {
                   );
                   DateTime fieldValue = DateTimeField.combine(date, time);
                   setState(() {
-                    widget.currentSelection = fieldValue;
+                    widget.currentDateTimeSelection = fieldValue;
                   });
                   return fieldValue;
                 } else {
                   setState(() {
-                    widget.currentSelection = currentValue ?? DateTime.now();
+                    widget.currentDateTimeSelection = currentValue ?? DateTime.now();
                   });
                   return currentValue;
                 }
@@ -299,7 +307,7 @@ class _SenderScreenState extends State<SenderScreen> {
               height: 10,
             ),
             Text(
-              'Selected date: ${widget.currentSelection != null ? widget.dateTimeFormat.format(widget.currentSelection!) : ""}',
+              'Selected date: ${widget.currentDateTimeSelection != null ? widget.dateTimeFormat.format(widget.currentDateTimeSelection!) : "No Selection"}',
               textScaleFactor: 1.5,
             ),
             SizedBox(
@@ -332,7 +340,7 @@ class _SenderScreenState extends State<SenderScreen> {
                       widget.recipient = newValue!;
                     });
                   },
-                  items: widget.contacts
+                  items: widget.contactsNameList!
                       .map<DropdownMenuItem<String>>((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
@@ -349,7 +357,20 @@ class _SenderScreenState extends State<SenderScreen> {
             OutlinedButton(
               child: Text('SEND'),
               onPressed: () {
-
+                /*
+                 TODO: Create a VoiceCapsule object and invoke sendToDatabase()
+                  * Get senderID from widget.contacts["Myself"]
+                  * Get recieverID from widget.contacts[widget.recipient]
+                  * Get file name from widget.audioFileUrl
+                  * Get capsule ID from database (not sure how yet)
+                */
+                String message = "Sender: Myself\n"
+                    "Sender UID: ${widget.contacts["Myself"]}\n"
+                    "Receiver: ${widget.recipient}\n"
+                    "Receiver UID: ${widget.contacts[widget.recipient]}\n"
+                    "Open Date/Time: ${widget.currentDateTimeSelection != null ? widget.dateTimeFormat.format(widget.currentDateTimeSelection!) : ""}\n\n"
+                    "You have pressed send!";
+                showAlertDialog_OK(context, message);
               },
             ),
           ],
