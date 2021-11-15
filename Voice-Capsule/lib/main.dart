@@ -11,6 +11,10 @@ import 'src/capsules.dart';
 import 'src/contacts.dart';
 import 'src/playback.dart';
 import 'src/widgets.dart';
+import 'src/body.dart';
+
+// Info for currently signed in user
+User? firebase_user;
 
 // Login functions
 class ApplicationState extends ChangeNotifier {
@@ -69,7 +73,9 @@ class ApplicationState extends ChangeNotifier {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
-      );
+      ).then((value) {
+        firebase_user = FirebaseAuth.instance.currentUser;
+      });
       // Hack so that LoginCard is in loggedOut state next time signOut() is called
       _loginState = ApplicationLoginState.loggedOut;
       return null;
@@ -97,7 +103,9 @@ class ApplicationState extends ChangeNotifier {
       void Function(FirebaseAuthException e) errorCallback) async {
     try {
       var credential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: email, password: password);
+          .createUserWithEmailAndPassword(email: email, password: password).then((value) {
+        firebase_user = FirebaseAuth.instance.currentUser;
+      });
       await credential.user!.updateDisplayName(displayName);
       // todo check that email is valid (ie not already in use by another account), erroneously transfers to home card after failed registration
       _loginState = ApplicationLoginState.loggedOut;
@@ -203,13 +211,18 @@ class _HomeCardState extends State<HomeCard>{
     const RecordWidget(),
     const CapsulesSlide(),
     const ContactsSlide(),
+    const FriendsWidget()
   ]; // list of widgets to be displayed
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Voice Capsule Test'),
+        title: const Text(
+          'Voice Capsule Test',
+          //'User ID: ${firebase_user?.uid ?? 'none'}',
+          //textScaleFactor: 0.75,
+        ),
         centerTitle: true,
         backgroundColor: Colors.purple,
       ),
@@ -232,6 +245,10 @@ class _HomeCardState extends State<HomeCard>{
             label: 'Contacts',
           ),
           BottomNavigationBarItem(
+            icon: Icon(Icons.person_search_rounded),
+            label: 'Friends',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.arrow_back_rounded),
             label: 'LOGOUT',
           ),
@@ -244,7 +261,7 @@ class _HomeCardState extends State<HomeCard>{
 
   void onTabTapped(int index) {
     setState(() {
-      if(index == 3){ // If logging out nav to loginCard
+      if(index == 4){ // If logging out nav to loginCard
         ApplicationState().signOut();
         Navigator.pushReplacement(
             context,
@@ -270,10 +287,24 @@ class RecordWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Widget defined in recorder.dart
-            SimpleRecorder(),
+            SimpleRecorder(contacts: <String>['Myself','Contact 1','Contact 2','Contact 3']),
           ],
         ),
       ),
+    );
+  }
+}
+
+class FriendsWidget extends StatelessWidget {
+  const FriendsWidget({Key? key}) : super(key: key);
+  @override
+  Widget build(BuildContext context){
+    return Scaffold(
+        appBar:  AppBar(
+          title: Text("Profile"),
+          centerTitle: true,
+        ),
+        body: Body()
     );
   }
 }
