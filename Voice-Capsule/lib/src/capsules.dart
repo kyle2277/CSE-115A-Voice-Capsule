@@ -62,7 +62,7 @@ class PlaybackScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SimplePlayback(),
+            SimplePlayback(audioFileUrl: 'recorded_file.mp4',),
           ],
         ),
       ),

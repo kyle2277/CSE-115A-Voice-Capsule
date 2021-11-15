@@ -11,7 +11,7 @@ import 'src/capsules.dart';
 import 'src/contacts.dart';
 import 'src/playback.dart';
 import 'src/widgets.dart';
-import 'src/body.dart';
+import 'src/profile.dart';
 import 'dart:collection';
 
 // Info for currently signed in user
@@ -227,7 +227,7 @@ class _HomeCardState extends State<HomeCard>{
     const RecordWidget(),
     const CapsulesSlide(),
     const ContactsSlide(),
-    const FriendsWidget()
+    const ProfileSlide()
   ]; // list of widgets to be displayed
 
   @override
@@ -257,16 +257,12 @@ class _HomeCardState extends State<HomeCard>{
             label: 'Capsules',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.contacts),
-            label: 'Contacts',
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.person_search_rounded),
             label: 'Friends',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.arrow_back_rounded),
-            label: 'LOGOUT',
+            icon: Icon(Icons.account_circle),
+            label: 'Profile',
           ),
         ],
         backgroundColor: Colors.grey[200],

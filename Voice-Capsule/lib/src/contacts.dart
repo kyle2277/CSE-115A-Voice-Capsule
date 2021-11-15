@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:voice_capsule/src/playback.dart';
 
 /*
  * Contacts page
@@ -63,7 +64,7 @@ class AddFriendsScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // SimplePlayback(),
+
           ],
         ),
       ),

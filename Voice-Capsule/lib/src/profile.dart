@@ -1,9 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:voice_capsule/src/profile_pic.dart';
+import '../main.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 
-class Body extends StatelessWidget{
+class ProfileSlide extends StatelessWidget{
+  const ProfileSlide({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context){
     return Column(
@@ -23,6 +27,16 @@ class Body extends StatelessWidget{
               children: [],
             ),
           ),
+        ),
+        TextButton(
+          child : const Text('LOGOUT'),
+          onPressed : () {
+            ApplicationState().signOut();
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginCard())
+            );
+          },
         ),
       ],
     );
