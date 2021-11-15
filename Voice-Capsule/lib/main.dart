@@ -12,9 +12,12 @@ import 'src/contacts.dart';
 import 'src/playback.dart';
 import 'src/widgets.dart';
 import 'src/body.dart';
+import 'dart:collection';
 
 // Info for currently signed in user
 User? firebase_user;
+// Current user's contacts
+LinkedHashMap<String, String> currentUserContacts = LinkedHashMap<String, String>();
 
 // Login functions
 class ApplicationState extends ChangeNotifier {
@@ -64,6 +67,15 @@ class ApplicationState extends ChangeNotifier {
     }
   }
 
+  // Fetch contacts for given userID from database
+  void populateUserContacts(String userID) {
+    currentUserContacts.clear();
+    currentUserContacts["Myself"] = firebase_user!.uid;
+    currentUserContacts["Robert"] = "1";
+    currentUserContacts["Thomas"] = "2";
+    currentUserContacts["Vivianne"] = "3";
+  }
+
   Future signInWithEmailAndPassword(
     String email,
     String password,
@@ -75,6 +87,8 @@ class ApplicationState extends ChangeNotifier {
         password: password,
       ).then((value) {
         firebase_user = FirebaseAuth.instance.currentUser;
+        // Todo: fetch user contacts from database and populate contacts map with <User name, UserID> key-values
+        populateUserContacts(firebase_user!.uid);
       });
       // Hack so that LoginCard is in loggedOut state next time signOut() is called
       _loginState = ApplicationLoginState.loggedOut;
@@ -105,6 +119,7 @@ class ApplicationState extends ChangeNotifier {
       var credential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password).then((value) {
         firebase_user = FirebaseAuth.instance.currentUser;
+        populateUserContacts(firebase_user!.uid);
       });
       await credential.user!.updateDisplayName(displayName);
       // todo check that email is valid (ie not already in use by another account), erroneously transfers to home card after failed registration
@@ -118,6 +133,7 @@ class ApplicationState extends ChangeNotifier {
   void signOut() {
     //_loginState = ApplicationLoginState.loggedOut;
     // notifyListeners();
+    currentUserContacts.clear();
     FirebaseAuth.instance.signOut();
   }
 
@@ -218,7 +234,7 @@ class _HomeCardState extends State<HomeCard>{
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Voice Capsule Test',
           //'User ID: ${firebase_user?.uid ?? 'none'}',
           //textScaleFactor: 0.75,
@@ -261,14 +277,7 @@ class _HomeCardState extends State<HomeCard>{
 
   void onTabTapped(int index) {
     setState(() {
-      if(index == 4){ // If logging out nav to loginCard
-        ApplicationState().signOut();
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const LoginCard()));
-      } else{
-        _currentIndex = index;
-      }
+      _currentIndex = index;
     });
   }
 }
@@ -287,24 +296,10 @@ class RecordWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Widget defined in recorder.dart
-            SimpleRecorder(contacts: <String>['Myself','Contact 1','Contact 2','Contact 3']),
+            SimpleRecorder(contacts: currentUserContacts),
           ],
         ),
       ),
-    );
-  }
-}
-
-class FriendsWidget extends StatelessWidget {
-  const FriendsWidget({Key? key}) : super(key: key);
-  @override
-  Widget build(BuildContext context){
-    return Scaffold(
-        appBar:  AppBar(
-          title: Text("Profile"),
-          centerTitle: true,
-        ),
-        body: Body()
     );
   }
 }
