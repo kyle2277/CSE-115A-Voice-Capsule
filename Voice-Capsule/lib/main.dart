@@ -7,8 +7,17 @@ import 'package:provider/provider.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'src/authentication.dart';
 import 'src/recorder.dart';
+import 'src/capsules.dart';
+import 'src/contacts.dart';
 import 'src/playback.dart';
 import 'src/widgets.dart';
+import 'src/profile.dart';
+import 'dart:collection';
+
+// Info for currently signed in user
+User? firebase_user;
+// Current user's contacts
+LinkedHashMap<String, String> currentUserContacts = LinkedHashMap<String, String>();
 
 // Login functions
 class ApplicationState extends ChangeNotifier {
@@ -58,6 +67,15 @@ class ApplicationState extends ChangeNotifier {
     }
   }
 
+  // Fetch contacts for given userID from database
+  void populateUserContacts(String userID) {
+    currentUserContacts.clear();
+    currentUserContacts["Myself"] = firebase_user!.uid;
+    currentUserContacts["Robert"] = "1";
+    currentUserContacts["Thomas"] = "2";
+    currentUserContacts["Vivianne"] = "3";
+  }
+
   Future signInWithEmailAndPassword(
     String email,
     String password,
@@ -67,7 +85,11 @@ class ApplicationState extends ChangeNotifier {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
-      );
+      ).then((value) {
+        firebase_user = FirebaseAuth.instance.currentUser;
+        // Todo: fetch user contacts from database and populate contacts map with <User name, UserID> key-values
+        populateUserContacts(firebase_user!.uid);
+      });
       // Hack so that LoginCard is in loggedOut state next time signOut() is called
       _loginState = ApplicationLoginState.loggedOut;
       return null;
@@ -95,7 +117,10 @@ class ApplicationState extends ChangeNotifier {
       void Function(FirebaseAuthException e) errorCallback) async {
     try {
       var credential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: email, password: password);
+          .createUserWithEmailAndPassword(email: email, password: password).then((value) {
+        firebase_user = FirebaseAuth.instance.currentUser;
+        populateUserContacts(firebase_user!.uid);
+      });
       await credential.user!.updateDisplayName(displayName);
       // todo check that email is valid (ie not already in use by another account), erroneously transfers to home card after failed registration
       _loginState = ApplicationLoginState.loggedOut;
@@ -108,6 +133,7 @@ class ApplicationState extends ChangeNotifier {
   void signOut() {
     //_loginState = ApplicationLoginState.loggedOut;
     // notifyListeners();
+    currentUserContacts.clear();
     FirebaseAuth.instance.signOut();
   }
 
@@ -196,23 +222,29 @@ class HomeCard extends StatefulWidget {
 
 // Changing Home Card based on navBar
 class _HomeCardState extends State<HomeCard>{
-  static int _currentIndex = 0; // initial index of bottom nav
+  int _currentIndex = 0; // initial index of bottom nav
   final List _children = [
     const RecordWidget(),
-    const CapsulesWidget(),
+    const CapsulesSlide(),
+    const ContactsSlide(),
+    const ProfileSlide()
   ]; // list of widgets to be displayed
-  static int _numCapsules = 1; // set at one for now until we figure out multiple notes
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Voice Capsule Test'),
+        title: Text(
+          'Voice Capsule Test',
+          //'User ID: ${firebase_user?.uid ?? 'none'}',
+          //textScaleFactor: 0.75,
+        ),
         centerTitle: true,
         backgroundColor: Colors.purple,
       ),
       body:  _children[_currentIndex], // Selected widget will be shown
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed, // keeps color fixed
         onTap: onTabTapped, // function for switching tabs
         currentIndex: _currentIndex, // index of currently selected tab
         items: const <BottomNavigationBarItem>[
@@ -223,6 +255,14 @@ class _HomeCardState extends State<HomeCard>{
           BottomNavigationBarItem(
             icon: Icon(Icons.list),
             label: 'Capsules',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_search_rounded),
+            label: 'Friends',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.account_circle),
+            label: 'Profile',
           ),
         ],
         backgroundColor: Colors.grey[200],
@@ -239,7 +279,7 @@ class _HomeCardState extends State<HomeCard>{
 }
 
 // Recording Screen slide
-// Ricardo on 11/6: Part of the change of making LoginCard stateless
+// Ricardo on 11/6: Part of the change of making LoginCard stateful
 class RecordWidget extends StatelessWidget {
   const RecordWidget({Key? key}) : super(key: key);
 
@@ -252,62 +292,10 @@ class RecordWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Widget defined in recorder.dart
-            SimpleRecorder(),
-            OutlinedButton(
-              child: const Text('LOGOUT'),
-              onPressed: () {
-                // Logout, then switch back to login page
-                ApplicationState().signOut();
-                Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginCard()));
-              },
-            ),
+            SimpleRecorder(contacts: currentUserContacts),
           ],
         ),
       ),
-    );
-  }
-}
-
-// Capsules Slide
-// Ricardo on 11/6: Part of the change of making LoginCard stateless
-class CapsulesWidget extends StatelessWidget {
-  const CapsulesWidget({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: ListWheelScrollView(
-        itemExtent: 280,
-        children: [
-          Container(
-            height: 100,
-            decoration: BoxDecoration(
-              color : Colors.purple,
-              borderRadius : BorderRadius.circular(15),
-            ),
-            child: SimplePlayback(),
-          ),
-          Container(
-              height: 100,
-              decoration: BoxDecoration(
-              color : Colors.purple,
-              borderRadius : BorderRadius.circular(15),
-            ),
-            child: const Center(
-              child : Text('Capsule 2',
-                textAlign : TextAlign.center,
-                style : TextStyle(
-                  color : Colors.white,
-                  fontSize : 50.0,
-                )
-              )
-            )
-          ),
-        ]
-      )
     );
   }
 }

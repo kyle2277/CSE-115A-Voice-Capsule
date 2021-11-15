@@ -4,12 +4,14 @@ import 'package:flutter_sound/flutter_sound.dart';
 import 'utils.dart';
 
 // todo remove hardcoding of file path
-const _audioFilePath = 'recorded_file.mp4';
 const double FIVE_SECONDS_IN_MILLIS = 5000;
 
 class SimplePlayback extends StatefulWidget {
   //const SimplePlayback({Key? key}) : super(key: key);
-
+  SimplePlayback({
+    required this.audioFileUrl,
+  });
+  String audioFileUrl;
   @override
   _SimplePlaybackState createState() => _SimplePlaybackState();
 }
@@ -68,12 +70,12 @@ class _SimplePlaybackState extends State<SimplePlayback> {
   // -------  Here is the code to playback a remote file -----------------------
 
   // Start playback of specified file
-  Future<void> startPlayer([filePath = _audioFilePath]) async {
+  Future<void> startPlayer() async {
     if (time == duration) {
       await seek(0);
     }
     await _mPlayer!.startPlayer(
-        fromURI: filePath,
+        fromURI: widget.audioFileUrl,
         codec: Codec.aacMP4,
         whenFinished: () {
           setState(() {});
@@ -241,6 +243,7 @@ class _SimplePlaybackState extends State<SimplePlayback> {
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         Slider(
+          activeColor: Colors.purple,
           value: time + 0.0,
           min: 0.0,
           max: duration + 0.0,

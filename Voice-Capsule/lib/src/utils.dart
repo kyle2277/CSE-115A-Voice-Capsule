@@ -42,6 +42,32 @@ void showToast_quick(BuildContext context, String message, {double duration = 2}
   );
 }
 
+Future<void> showAlertDialog_OK(BuildContext context, String message) async {
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: false, // user must tap button!
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Send Capsule'),
+        content: SingleChildScrollView(
+          child: Text(
+            message,
+            textScaleFactor: 0.75,
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('OK'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
 final double MILLIS_IN_A_SECOND = 1000;
 final double SECONDS_IN_A_MINUTE = 60;
 
