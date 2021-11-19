@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:flutter_sound_platform_interface/flutter_sound_platform_interface.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -28,12 +29,12 @@ class SimpleRecorder extends StatefulWidget {
 
 class _SimpleRecorderState extends State<SimpleRecorder> {
 
-  static const int MAX_RECORDING_MINUTES = 1;
+  static const int MAX_RECORDING_MINUTES = 5;
   // min * sec/min * ms/sec = ms
   static const int MAX_RECORDING_MILLIS = MAX_RECORDING_MINUTES * 60 * 1000;
   // Audio codec
   Codec _codec = Codec.aacMP4;
-  String _filePath = 'recorded_file.mp4';
+  String filePath = "outgoing_" + sanitizeString(DateTime.now().toString()) + ".mp4";
   // "?" makes nullable type
   FlutterSoundRecorder? recorder = FlutterSoundRecorder();
   bool _recorderIsInitialized = false;
@@ -113,7 +114,7 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
     // Clear path to last recorded file
     _recordedUrl = null;
     await recorder!.startRecorder(
-      toFile: _filePath,
+      toFile: filePath,
       codec: _codec,
     )
         .then((value) {
@@ -239,7 +240,7 @@ class SenderScreen extends StatefulWidget {
   DateTime? currentDateTimeSelection;
   // Recipient selection
   String? recipient;
-  final dateTimeFormat = DateFormat("MM-dd-yyyy, hh:mm a");
+
 
   @override
   _SenderScreenState createState() => _SenderScreenState();
@@ -277,7 +278,7 @@ class _SenderScreenState extends State<SenderScreen> {
             SimplePlayback(audioFileUrl: widget.audioFileUrl),
             //BasicDateTimeField(currentSelection: widget.currentSelection),
             DateTimeField(
-              format: widget.dateTimeFormat,
+              format: dateTimeFormat,
               onShowPicker: (context, currentValue) async {
                 final date = await showDatePicker(
                     context: context,
@@ -307,7 +308,8 @@ class _SenderScreenState extends State<SenderScreen> {
               height: 10,
             ),
             Text(
-              'Selected date: ${widget.currentDateTimeSelection != null ? widget.dateTimeFormat.format(widget.currentDateTimeSelection!) : "No Selection"}',
+              'Selected date: ${widget.currentDateTimeSelection != null ? widget.currentDateTimeSelection! : "No Selection"}',
+              //'Selected date: ${widget.currentDateTimeSelection != null ? dateTimeFormat.format(widget.currentDateTimeSelection!) : "No Selection"}',
               textScaleFactor: 1.5,
             ),
             SizedBox(
@@ -368,7 +370,7 @@ class _SenderScreenState extends State<SenderScreen> {
                     "Sender UID: ${widget.contacts["Myself"]}\n"
                     "Receiver: ${widget.recipient}\n"
                     "Receiver UID: ${widget.contacts[widget.recipient]}\n"
-                    "Open Date/Time: ${widget.currentDateTimeSelection != null ? widget.dateTimeFormat.format(widget.currentDateTimeSelection!) : ""}\n\n"
+                    "Open Date/Time: ${widget.currentDateTimeSelection != null ? dateTimeFormat.format(widget.currentDateTimeSelection!) : ""}\n\n"
                     "You have pressed send!";
                 showAlertDialog_OK(context, message);
               },

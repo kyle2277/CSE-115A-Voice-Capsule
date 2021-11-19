@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-
+import 'package:intl/intl.dart';
 /*
  * Utility functions for general app UI features
  */
+
+final dateTimeFormat = DateFormat("MM-dd-yyyy, hh:mm a");
 
 // Shows "snackbar" style popup with the given message and an OK button
 // Default duration of 5 seconds
@@ -66,6 +68,15 @@ Future<void> showAlertDialog_OK(BuildContext context, String message) async {
       );
     },
   );
+}
+
+// Replaces ' ', '/', '.', ':' characters in a string so it can be used as a file path
+String sanitizeString(String input) {
+  String output = input.replaceAll(' ', '_');
+  output = output.replaceAll('/', '_');
+  output = output.replaceAll('.', '-');
+  output = output.replaceAll(':', '-');
+  return output;
 }
 
 final double MILLIS_IN_A_SECOND = 1000;
