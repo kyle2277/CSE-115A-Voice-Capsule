@@ -269,6 +269,8 @@ class _SenderScreenState extends State<SenderScreen> {
     super.initState();
   }
 
+  // Must be able to update a user's sent capsules AND the receiver's
+  // pending capsules
   void sendToDatabase(String senderID, String receiverID,
       String fileName, String capsuleID) {
     // Collection of all users
@@ -281,10 +283,20 @@ class _SenderScreenState extends State<SenderScreen> {
         .collection('capsules')
         .doc('sent_capsules');
 
-    // Add a new entry with the appropriate details
-    sent_caps.set({
-      'capsule_1' : {'open_date_time' : 'another', 'receiver_uid' : 'test'},
+    // Get creation time for unique identifier
+    final DateTime now = DateTime.now();
+    final DateFormat formatter = DateFormat('yyyy-MM-dd_hh-mm');
+    final String cur_date_time = formatter.format(now);
+
+    // Add a new entry with the appropriate details (how to set name, or
+    // just use random series of alphanum?
+    sent_caps.update(<String, dynamic>{
+      'capsule_${firebase_user!.uid}_${cur_date_time}' : {
+        'open_date_time': 'date',
+        'receiver_uid': 'another',
+      },
     });
+
   }
 
   @override
