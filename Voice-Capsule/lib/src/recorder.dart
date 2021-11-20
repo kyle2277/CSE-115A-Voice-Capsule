@@ -272,16 +272,18 @@ class _SenderScreenState extends State<SenderScreen> {
   void sendToDatabase(String senderID, String receiverID,
       String fileName, String capsuleID) {
     // Collection of all users
-    String name = "ACTeaxfmqyZ1BU6yIfkG";
+    String name = firebase_user!.uid;
     // Targeting a specific user for now
-    String name2 = "keH6E0pMOdleoRDjmUIz";
-    DocumentReference user_doc = FirebaseFirestore.instance
+    print(name);
+    DocumentReference sent_caps = FirebaseFirestore.instance
         .collection('users')
         .doc(name)
         .collection('capsules')
-        .doc(name2);
-    user_doc.update(<String, dynamic>{
-      'linkURL' : 'www.com',
+        .doc('sent_capsules');
+
+    // Add a new entry with the appropriate details
+    sent_caps.set({
+      'capsule_1' : {'open_date_time' : 'another', 'receiver_uid' : 'test'},
     });
   }
 
