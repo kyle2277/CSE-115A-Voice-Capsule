@@ -271,32 +271,35 @@ class _SenderScreenState extends State<SenderScreen> {
 
   // Must be able to update a user's sent capsules AND the receiver's
   // pending capsules
-  void sendToDatabase(String senderID, String receiverID,
-      String fileName, String capsuleID) {
+  void sendToDatabase(String senderID, String receiverID, String fileName) {
     // Collection of all users
     String name = firebase_user!.uid;
-    // Targeting a specific user for now
-    print(name);
-    DocumentReference sent_caps = FirebaseFirestore.instance
+
+    // Reach the collection of capsules in the database
+    CollectionReference capsules = FirebaseFirestore.instance
         .collection('users')
         .doc(name)
-        .collection('capsules')
-        .doc('sent_capsules');
+        .collection('capsules');
+
+    DocumentReference pend_caps = capsules.doc('pending_capsules');
+    DocumentReference sent_caps = capsules.doc('sent_capsules');
 
     // Get creation time for unique identifier
     final DateTime now = DateTime.now();
-    final DateFormat formatter = DateFormat('yyyy-MM-dd_hh-mm');
+    final DateFormat formatter = DateFormat('yyyy-MM-dd_hh-mm-ss');
     final String cur_date_time = formatter.format(now);
 
-    // Add a new entry with the appropriate details (how to set name, or
-    // just use random series of alphanum?
+    // Add a new entry with the appropriate details
+    //
+    // why is the date select button above and invisible?
+    //
+    // must make a user choose a date somewhere...
     sent_caps.update(<String, dynamic>{
       'capsule_${firebase_user!.uid}_${cur_date_time}' : {
-        'open_date_time': 'date',
+        'open_date_time': widget.dateTimeFormat.format(widget.currentDateTimeSelection!),
         'receiver_uid': 'another',
       },
     });
-
   }
 
   @override
@@ -314,32 +317,36 @@ class _SenderScreenState extends State<SenderScreen> {
           children: [
             SimplePlayback(audioFileUrl: widget.audioFileUrl),
             //BasicDateTimeField(currentSelection: widget.currentSelection),
-            DateTimeField(
-              format: widget.dateTimeFormat,
-              onShowPicker: (context, currentValue) async {
-                final date = await showDatePicker(
-                    context: context,
-                    firstDate: DateTime(1900),
-                    initialDate: currentValue ?? DateTime.now(),
-                    lastDate: DateTime(2100));
-                if (date != null) {
-                  final time = await showTimePicker(
-                    context: context,
-                    initialTime:
-                    TimeOfDay.fromDateTime(currentValue ?? DateTime.now()),
-                  );
-                  DateTime fieldValue = DateTimeField.combine(date, time);
-                  setState(() {
-                    widget.currentDateTimeSelection = fieldValue;
-                  });
-                  return fieldValue;
-                } else {
-                  setState(() {
-                    widget.currentDateTimeSelection = currentValue ?? DateTime.now();
-                  });
-                  return currentValue;
-                }
-              },
+            Padding(
+              padding: const EdgeInsets.only(left: 20.0, right: 20.0),
+              child: DateTimeField(
+                decoration: InputDecoration(hintText: 'No selection'),
+                format: widget.dateTimeFormat,
+                onShowPicker: (context, currentValue) async {
+                  final date = await showDatePicker(
+                      context: context,
+                      firstDate: DateTime(1900),
+                      initialDate: currentValue ?? DateTime.now(),
+                      lastDate: DateTime(2100));
+                  if (date != null) {
+                    final time = await showTimePicker(
+                      context: context,
+                      initialTime:
+                      TimeOfDay.fromDateTime(currentValue ?? DateTime.now()),
+                    );
+                    DateTime fieldValue = DateTimeField.combine(date, time);
+                    setState(() {
+                      widget.currentDateTimeSelection = fieldValue;
+                    });
+                    return fieldValue;
+                  } else {
+                    setState(() {
+                      widget.currentDateTimeSelection = currentValue ?? DateTime.now();
+                    });
+                    return currentValue;
+                  }
+                },
+              ),
             ),
             SizedBox(
               height: 10,
@@ -400,22 +407,24 @@ class _SenderScreenState extends State<SenderScreen> {
                   x Get senderID from widget.contacts["Myself"]
                   x Get recieverID from widget.contacts[widget.recipient]
                   x Get file name from widget.audioFileUrl
-                  * Get capsule ID from database (not sure how yet)
+                  x Get capsule ID from database (not sure how yet)
                   **save url?
                 */
 
-                String? senderID = widget.contacts["Myself"];
-                String? receiverID = widget.recipient;
-                String? fileName = widget.audioFileUrl;
-                String? capsuleID = "something";
+                // if date time selection is null (not set), throw error
 
-                // Send the parameters to the database
-                sendToDatabase(senderID!, receiverID!, fileName!, capsuleID!);
+                String? senderID = widget.contacts["Myself"];
+                String? receiverID = widget.contacts[widget.recipient];
+                String? fileName = widget.audioFileUrl;
+
+                // Send the parameters to the database for the sender
+                // **also need to send parameters to database for receiver
+                sendToDatabase(senderID!, receiverID!, fileName!);
 
                 String message = "Sender: Myself\n"
                     "Sender UID: ${senderID}\n"
-                    "Receiver: ${receiverID}\n"
-                    "Receiver UID: ${widget.contacts[receiverID]}\n"
+                    "Receiver: ${widget.contacts[receiverID]}\n"
+                    "Receiver UID: ${receiverID}\n"
                     "Open Date/Time: ${widget.currentDateTimeSelection != null ? widget.dateTimeFormat.format(widget.currentDateTimeSelection!) : ""}\n\n"
                     "You have pressed send!";
                 showAlertDialog_OK(context, message);
