@@ -272,33 +272,43 @@ class _SenderScreenState extends State<SenderScreen> {
   // Must be able to update a user's sent capsules AND the receiver's
   // pending capsules
   void sendToDatabase(String senderID, String receiverID, String fileName) {
-    // Collection of all users
-    String name = firebase_user!.uid;
+    // Grab reference to the users collection
+    CollectionReference all_users = FirebaseFirestore.instance
+        .collection('users');
 
-    // Reach the collection of capsules in the database
-    CollectionReference capsules = FirebaseFirestore.instance
-        .collection('users')
-        .doc(name)
-        .collection('capsules');
-
-    DocumentReference pend_caps = capsules.doc('pending_capsules');
-    DocumentReference sent_caps = capsules.doc('sent_capsules');
+    // Obtain references to the sending and pending documents for each side
+    DocumentReference sender_capsules = all_users
+        .doc(senderID)
+        .collection('capsules')
+        .doc('sent_capsules');
+    DocumentReference receiver_capsules = all_users
+        .doc(receiverID)
+        .collection('capsules')
+        .doc('pending_capsules');
 
     // Get creation time for unique identifier
     final DateTime now = DateTime.now();
     final DateFormat formatter = DateFormat('yyyy-MM-dd_hh-mm-ss');
     final String cur_date_time = formatter.format(now);
 
-    // Add a new entry with the appropriate details
-    //
-    // why is the date select button above and invisible?
-    //
-    // must make a user choose a date somewhere...
-    sent_caps.update(<String, dynamic>{
-      'capsule_${firebase_user!.uid}_${cur_date_time}' : {
-        'open_date_time': widget.dateTimeFormat.format(widget.currentDateTimeSelection!),
+    final String capsule_name = 'capsule_${firebase_user!.uid}_${cur_date_time}';
+    final String open_time = widget.dateTimeFormat.format(widget.currentDateTimeSelection!);
+
+    // Add a new entry with the appropriate details to sent capsules
+    sender_capsules.update(<String, dynamic>{
+      capsule_name : {
+        'open_date_time': open_time,
         'receiver_uid': 'another',
       },
+    });
+
+    // Add a new entry with the appropriate details to pending capsules
+    receiver_capsules.update(<String, dynamic>{
+      capsule_name : {
+        'open_date_time': open_time,
+        'sender_uid': '${firebase_user!.uid}',
+        'url': 'gs://something',
+      }
     });
   }
 
