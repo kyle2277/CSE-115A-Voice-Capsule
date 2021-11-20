@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math';
@@ -6,6 +8,8 @@ import 'package:flutter_sound_platform_interface/flutter_sound_platform_interfac
 import 'package:permission_handler/permission_handler.dart';
 import 'package:intl/intl.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
+import 'package:voice_capsule/src/voice_capsule.dart';
+import 'authentication.dart';
 import 'date_time_picker.dart';
 import 'playback.dart';
 import 'dart:collection';
@@ -19,6 +23,8 @@ import 'utils.dart';
 class SimpleRecorder extends StatefulWidget {
   SimpleRecorder({
     required this.contacts,
+    // will we need to pass in the firebase instance to pass into send screen
+    // through this argument?
   });
   // User contacts
   LinkedHashMap<String, String> contacts;
@@ -230,6 +236,8 @@ class SenderScreen extends StatefulWidget {
   SenderScreen({
     required this.contacts,
     required this.audioFileUrl,
+    // will we need to pass in the firebase instance started in main to
+    // ensure we can send something here when ready to send?
   });
   // List of contacts
   LinkedHashMap<String, String> contacts;
@@ -259,6 +267,22 @@ class _SenderScreenState extends State<SenderScreen> {
     }
     widget.recipient = widget.contactsNameList![0];
     super.initState();
+  }
+
+  void sendToDatabase(String senderID, String receiverID,
+      String fileName, String capsuleID) {
+    // Collection of all users
+    String name = "ACTeaxfmqyZ1BU6yIfkG";
+    // Targeting a specific user for now
+    String name2 = "keH6E0pMOdleoRDjmUIz";
+    DocumentReference user_doc = FirebaseFirestore.instance
+        .collection('users')
+        .doc(name)
+        .collection('capsules')
+        .doc(name2);
+    user_doc.update(<String, dynamic>{
+      'linkURL' : 'www.com',
+    });
   }
 
   @override
@@ -359,15 +383,25 @@ class _SenderScreenState extends State<SenderScreen> {
               onPressed: () {
                 /*
                  TODO: Create a VoiceCapsule object and invoke sendToDatabase()
-                  * Get senderID from widget.contacts["Myself"]
-                  * Get recieverID from widget.contacts[widget.recipient]
-                  * Get file name from widget.audioFileUrl
+                  x Get senderID from widget.contacts["Myself"]
+                  x Get recieverID from widget.contacts[widget.recipient]
+                  x Get file name from widget.audioFileUrl
                   * Get capsule ID from database (not sure how yet)
+                  **save url?
                 */
+
+                String? senderID = widget.contacts["Myself"];
+                String? receiverID = widget.recipient;
+                String? fileName = widget.audioFileUrl;
+                String? capsuleID = "something";
+
+                // Send the parameters to the database
+                sendToDatabase(senderID!, receiverID!, fileName!, capsuleID!);
+
                 String message = "Sender: Myself\n"
-                    "Sender UID: ${widget.contacts["Myself"]}\n"
-                    "Receiver: ${widget.recipient}\n"
-                    "Receiver UID: ${widget.contacts[widget.recipient]}\n"
+                    "Sender UID: ${senderID}\n"
+                    "Receiver: ${receiverID}\n"
+                    "Receiver UID: ${widget.contacts[receiverID]}\n"
                     "Open Date/Time: ${widget.currentDateTimeSelection != null ? widget.dateTimeFormat.format(widget.currentDateTimeSelection!) : ""}\n\n"
                     "You have pressed send!";
                 showAlertDialog_OK(context, message);
