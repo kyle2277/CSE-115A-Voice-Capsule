@@ -100,6 +100,7 @@ class VoiceCapsule {
       capsule_name : {
         'open_date_time': open_time,
         'sender_uid': senderUID,
+        // Format is <who receives capsule>/capsule_<who sends capsule>_<open time>.mp4
         'storage_path': '${receiverUID}/capsule_${senderUID}_${open_time_formatted}.mp4',
       }
     });
