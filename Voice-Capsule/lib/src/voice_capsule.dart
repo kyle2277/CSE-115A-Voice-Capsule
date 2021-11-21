@@ -69,8 +69,7 @@ class VoiceCapsule {
         .collection('capsules')
         .doc('pending_capsules');
 
-    // Get creation time for unique identifier
-    final DateTime now = DateTime.now();
+    // Use open time to create a distinct name for the file uploaded
     final DateFormat formatter_file = DateFormat('yyyy-MM-dd_HH-mm-ss');
     final DateFormat formatter_db = DateFormat('yyyy-MM-dd HH:mm:ss');
 
@@ -79,12 +78,7 @@ class VoiceCapsule {
 
     final String capsule_name = 'capsule_${firebase_user!.uid}_${open_time_formatted}';
 
-    /*
-      TODO: Upload audio file to Firebase storage and obtain URL for use in
-        VoiceCapsule construction to log in database; storage path
-        --relative to Firebase Storage should be provided--
-    */
-
+    // Upload the voice capsule just recorded onto Firebase storage
     this.uploadToStorage();
 
     // Add a new entry with the appropriate details to sent capsules
