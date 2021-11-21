@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'widgets.dart';
 
@@ -293,6 +294,25 @@ class _RegisterFormState extends State<RegisterForm> {
     _emailController.text = widget.email;
   }
 
+  // Add data to the database for a newly registered user
+  void registerUser()
+  {
+    CollectionReference all_users = FirebaseFirestore.instance
+        .collection('users');
+
+    // Add entry for a user
+    all_users.add({
+      firebase_user!.uid : {
+        'contacts': {
+          'email': 'uid',
+          'email_2': 'uid_2',
+        },
+        'email': firebase_user!.email,
+        'uid': firebase_user!.uid,
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -376,9 +396,6 @@ class _RegisterFormState extends State<RegisterForm> {
                                 widget.navToHome(context);
                               }
                             });
-
-
-
                           }
                         },
                         child: const Text('SAVE'),

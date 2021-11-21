@@ -269,51 +269,6 @@ class _SenderScreenState extends State<SenderScreen> {
     super.initState();
   }
 
-  // Must be able to update a user's sent capsules AND the receiver's
-  // pending capsules
-  void sendToDatabase(String senderID, String receiverID, String fileName) {
-    // Grab reference to the users collection
-    CollectionReference all_users = FirebaseFirestore.instance
-        .collection('users');
-
-    // Obtain references to the sending and pending documents for each side
-    DocumentReference sender_capsules = all_users
-        .doc(senderID)
-        .collection('capsules')
-        .doc('sent_capsules');
-    DocumentReference receiver_capsules = all_users
-        .doc(receiverID)
-        .collection('capsules')
-        .doc('pending_capsules');
-
-    // Get creation time for unique identifier
-    final DateTime now = DateTime.now();
-    final DateFormat formatter = DateFormat('yyyy-MM-dd_hh-mm-ss');
-    final String cur_date_time = formatter.format(now);
-
-    final String capsule_name = 'capsule_${firebase_user!.uid}_${cur_date_time}';
-    final String open_time = widget.dateTimeFormat.format(widget.currentDateTimeSelection!);
-
-    // Upload audio file to Firebase storage and obtain URL
-
-    // Add a new entry with the appropriate details to sent capsules
-    sender_capsules.update(<String, dynamic>{
-      capsule_name : {
-        'open_date_time': open_time,
-        'receiver_uid': receiverID,
-      },
-    });
-
-    // Add a new entry with the appropriate details to pending capsules
-    receiver_capsules.update(<String, dynamic>{
-      capsule_name : {
-        'open_date_time': open_time,
-        'sender_uid': senderID,
-        'url': 'gs://something',
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -429,9 +384,15 @@ class _SenderScreenState extends State<SenderScreen> {
                 String? receiverID = widget.contacts[widget.recipient];
                 String? fileName = widget.audioFileUrl;
 
-                // Send the parameters to the database for the sender
-                // **also need to send parameters to database for receiver
-                sendToDatabase(senderID!, receiverID!, fileName!);
+                // Instantiate a voice capsule for sending
+                VoiceCapsule vo_cap = new VoiceCapsule(
+                    senderID!,
+                    receiverID!,
+                    widget.currentDateTimeSelection!,
+                    fileName);
+
+                // Send the voice capsule to the database
+                vo_cap.sendToDatabase();
 
                 String message = "Sender: Myself\n"
                     "Sender UID: ${senderID}\n"
