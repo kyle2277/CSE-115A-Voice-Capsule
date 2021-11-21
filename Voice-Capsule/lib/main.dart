@@ -113,7 +113,7 @@ class ApplicationState extends ChangeNotifier {
 
   // Creates new accounts using the provided email, desired display name,
   // and password, as well as sets up the Cloud Firestore fields for
-  // them
+  // them.
   Future registerAccount(String email, String displayName, String password,
       void Function(FirebaseAuthException e) errorCallback) async {
     try {
