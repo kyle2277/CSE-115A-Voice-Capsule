@@ -111,7 +111,9 @@ class ApplicationState extends ChangeNotifier {
     notifyListeners();
   }
 
-  // changed to authenticate new accounts modeled after signIn
+  // Creates new accounts using the provided email, desired display name,
+  // and password, as well as sets up the Cloud Firestore fields for
+  // them
   Future registerAccount(String email, String displayName, String password,
       void Function(FirebaseAuthException e) errorCallback) async {
     try {
@@ -124,8 +126,24 @@ class ApplicationState extends ChangeNotifier {
         CollectionReference all_users = FirebaseFirestore.instance
             .collection('users');
 
-        all_users.doc(firebase_user!.uid).set({'test': 'something'});
+        // Initializes the contacts, requests, and uid fields for a new account
+        all_users.doc(firebase_user!.uid).set({
+          'contacts': {},
+          'email': firebase_user!.email,
+          'requests': [],
+          'uid': firebase_user!.uid,
+        });
 
+        // Initializes the capsule listings for new users
+        all_users.doc(firebase_user!.uid)
+            .collection('capsules')
+            .doc('pending_capsules')
+            .set({});
+
+        all_users.doc(firebase_user!.uid)
+            .collection('capsules')
+            .doc('sent_capsules')
+            .set({});
       });
       await credential.user!.updateDisplayName(displayName);
       // todo check that email is valid (ie not already in use by another account), erroneously transfers to home card after failed registration
