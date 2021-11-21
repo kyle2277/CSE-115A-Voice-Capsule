@@ -44,7 +44,7 @@ class VoiceCapsule {
 
     // Get creation time for unique identifier
     final DateTime now = DateTime.now();
-    final DateFormat formatter_file = DateFormat('yyyy-MM-dd_hh-mm-ss');
+    final DateFormat formatter_file = DateFormat('yyyy-MM-dd_HH-mm-ss');
     final DateFormat formatter_db = DateFormat('yyyy-MM-dd HH:mm:ss');
 
     final String cur_date_time = formatter_file.format(now);
