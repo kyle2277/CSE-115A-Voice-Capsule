@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+import 'package:http/http.dart' as http;
 import 'dart:typed_data';
 import 'utils.dart';
 
@@ -21,12 +25,25 @@ class VoiceCapsule {
   VoiceCapsule(this.senderUID, this.receiverUID, this.openDateTime, this.audioFileUrl);
 
   // Store voice capsule in database
-  Future<bool> sendToDatabase() async {
-    if(capsuleID.isEmpty) {
-      return false;
-    }
-    // Todo: change to true once database logic added
-    return false;
+  // TODO: remove for merge with dev
+  static Future<void> sendToDatabase() async {
+    String downloadURL;
+    Directory appDocDir = await getApplicationDocumentsDirectory();
+    print(appDocDir.absolute.toString());
+    String localFilePath = '/data/user/0/com.ucsc.voice_capsule/cache/outgoing_2021-11-18_20-57-03-403812.mp4';
+    String storageFilePath = 'outgoing_2021-11-18_20-57-03-403812.mp4';
+    firebase_storage.FirebaseStorage storage = firebase_storage.FirebaseStorage.instance;
+    firebase_storage.Reference ref = storage.ref().child(storageFilePath);
+    firebase_storage.UploadTask uploadTask = ref.putFile(
+      File(localFilePath),
+      firebase_storage.SettableMetadata(
+        contentType: "video/mp4",
+      ),
+    );
+    uploadTask.then((res) async {
+      String downloadURL = await res.ref.getDownloadURL();
+      print(downloadURL);
+    });
   }
 
   // Required before any database access functions
@@ -60,11 +77,21 @@ class VoiceCapsule {
 
   // Get voice note of given ID from the database
   // Must provide sender and receiver UIDs
-  static VoiceCapsule? fetchFromDatabase(String url, String senderUID, String receiverUID) {
-    // Todo: get this info from the database
-    String audioFileUrl = "";
-    DateTime openDateTime = DateTime.now();
-    return VoiceCapsule(senderUID, receiverUID, openDateTime, audioFileUrl);
+  static Future<void> fetchFromDatabase(String fileName, String senderUID, String receiverUID) async {
+    firebase_storage.FirebaseStorage storage = firebase_storage.FirebaseStorage.instance;
+    firebase_storage.Reference ref = storage.ref().child(fileName);
+    String downloadURL = await ref.getDownloadURL();
+    //http.Response downloadedData = await http.get(Uri.parse(downloadURL));
+    List<String> fileNameSplit = fileName.split("outgoing");
+    String saveFileName = "incoming${fileNameSplit[1]}";
+    print(saveFileName);
+    String saveURL = '/data/user/0/com.ucsc.voice_capsule/cache/$saveFileName';
+    File saveFile = File(saveURL);
+    if(saveFile.existsSync()) {
+      await saveFile.delete();
+    }
+    await saveFile.create();
+    firebase_storage.DownloadTask downloadFile = ref.writeToFile(saveFile);
   }
 
 }

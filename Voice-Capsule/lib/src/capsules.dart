@@ -51,8 +51,11 @@ class _CapsulesSlideState extends State<CapsulesSlide>{
         ),
         RaisedButton(
           onPressed: () async {
+            //VoiceCapsule.sendToDatabase();
+
+            String myUID = FirebaseAuth.instance.currentUser!.uid;
             showToast_OK(context, "Loading...", duration:10000);
-            await VoiceCapsule.checkForCapsules(FirebaseAuth.instance.currentUser!.uid).then((capsules) {
+            await VoiceCapsule.checkForCapsules(myUID).then((capsules) {
               if(capsules.isEmpty) {
                 print("No available capsules");
                 return;
@@ -60,12 +63,14 @@ class _CapsulesSlideState extends State<CapsulesSlide>{
               for(Map<String, dynamic> capsule in capsules) {
                 String senderUID = capsule['sender_uid'];
                 String openDateTime_str = capsule['open_date_time'];
-                String url = capsule['url'];
+                String directDownloadURL = capsule['url'];
+                String fileName = capsule['storage_path'];
                 print("Available Capsule:");
                 print("Sender UID: $senderUID");
-                print("Storage url: $url");
+                print("Storage url: $directDownloadURL");
+                print("Storage file name: $fileName");
                 print("Open Date/Time: $openDateTime_str");
-                // fetchFromDatabase(url, senderUID, receiverUID (myself))
+                VoiceCapsule.fetchFromDatabase(fileName, senderUID, myUID);
               }
             });
             ScaffoldMessenger.of(context).hideCurrentSnackBar();
