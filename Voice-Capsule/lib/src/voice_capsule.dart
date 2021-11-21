@@ -27,19 +27,26 @@ class VoiceCapsule {
   VoiceCapsule(this.senderUID, this.receiverUID, this.openDateTime, this.audioFileUrl);
 
   // Uploads the selected voice capsule into storage
-  Future<bool> uploadToStorage() async {
+  Future<void> uploadToStorage() async {
+    // Prepare formatting
+    final DateFormat formatter = DateFormat('yyyy-MM-dd_HH-mm-ss');
+    final String open_date_time = formatter.format(openDateTime);
+
+    // Get current instance of Firebase storage for the user
     firebase_storage.FirebaseStorage storage = firebase_storage.FirebaseStorage.instance;
 
-    Directory appDocDir = await getApplicationDocumentsDirectory();
-
+    // Get file path to the file that was just recorded
     String filePath = '/data/user/0/com.ucsc.voice_capsule/cache/recorded_file.mp4';
     File file = File(filePath);
 
-    // try to upload
-    await storage.ref().child('${firebase_user!.uid}/recorded_file.mp4').putFile(file);
+    // Upload to the receiver's folder for fetching by the receiver
+    firebase_storage.UploadTask uploadTask = storage.ref()
+        .child('${this.receiverUID}/capsule_${firebase_user!.uid}_${open_date_time}.mp4')
+        .putFile(file);
 
-    // should verify that upload was successful
-    return true;
+    uploadTask.then((result) async {
+      return true;
+    });
   }
 
   // Store voice capsule in database
@@ -67,10 +74,10 @@ class VoiceCapsule {
     final DateFormat formatter_file = DateFormat('yyyy-MM-dd_HH-mm-ss');
     final DateFormat formatter_db = DateFormat('yyyy-MM-dd HH:mm:ss');
 
-    final String cur_date_time = formatter_file.format(now);
     final String open_time = formatter_db.format(this.openDateTime);
+    final String open_time_formatted = formatter_file.format(this.openDateTime);
 
-    final String capsule_name = 'capsule_${firebase_user!.uid}_${cur_date_time}';
+    final String capsule_name = 'capsule_${firebase_user!.uid}_${open_time_formatted}';
 
     /*
       TODO: Upload audio file to Firebase storage and obtain URL for use in
@@ -93,8 +100,7 @@ class VoiceCapsule {
       capsule_name : {
         'open_date_time': open_time,
         'sender_uid': senderUID,
-        'storage_path': this.audioFileUrl,
-        'url': 'gs://something',
+        'storage_path': '${receiverUID}/capsule_${senderUID}_${open_time_formatted}.mp4',
       }
     });
 
