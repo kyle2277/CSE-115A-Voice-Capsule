@@ -294,11 +294,13 @@ class _SenderScreenState extends State<SenderScreen> {
     final String capsule_name = 'capsule_${firebase_user!.uid}_${cur_date_time}';
     final String open_time = widget.dateTimeFormat.format(widget.currentDateTimeSelection!);
 
+    // Upload audio file to Firebase storage and obtain URL
+
     // Add a new entry with the appropriate details to sent capsules
     sender_capsules.update(<String, dynamic>{
       capsule_name : {
         'open_date_time': open_time,
-        'receiver_uid': 'another',
+        'receiver_uid': receiverID,
       },
     });
 
@@ -306,7 +308,7 @@ class _SenderScreenState extends State<SenderScreen> {
     receiver_capsules.update(<String, dynamic>{
       capsule_name : {
         'open_date_time': open_time,
-        'sender_uid': '${firebase_user!.uid}',
+        'sender_uid': senderID,
         'url': 'gs://something',
       }
     });
