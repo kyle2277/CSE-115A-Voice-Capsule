@@ -52,7 +52,10 @@ class VoiceCapsule {
 
     final String capsule_name = 'capsule_${firebase_user!.uid}_${cur_date_time}';
 
-    // Upload audio file to Firebase storage and obtain URL
+    /*
+      TODO: Upload audio file to Firebase storage and obtain URL for use in
+        VoiceCapsule construction to log in database
+    */
 
     // Add a new entry with the appropriate details to sent capsules
     sender_capsules.update(<String, dynamic>{
