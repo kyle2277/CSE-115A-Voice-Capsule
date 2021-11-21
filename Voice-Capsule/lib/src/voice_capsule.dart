@@ -1,3 +1,7 @@
+import 'dart:io';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:path_provider/path_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -21,6 +25,22 @@ class VoiceCapsule {
   //Uint8List audioFileBytes = Uint8List(1024);
 
   VoiceCapsule(this.senderUID, this.receiverUID, this.openDateTime, this.audioFileUrl);
+
+  // Uploads the selected voice capsule into storage
+  Future<bool> uploadToStorage() async {
+    firebase_storage.FirebaseStorage storage = firebase_storage.FirebaseStorage.instance;
+
+    Directory appDocDir = await getApplicationDocumentsDirectory();
+
+    String filePath = '/data/user/0/com.ucsc.voice_capsule/cache/recorded_file.mp4';
+    File file = File(filePath);
+
+    // try to upload
+    await storage.ref().child('${firebase_user!.uid}/recorded_file.mp4').putFile(file);
+
+    // should verify that upload was successful
+    return true;
+  }
 
   // Store voice capsule in database
   Future<bool> sendToDatabase() async {
@@ -54,8 +74,11 @@ class VoiceCapsule {
 
     /*
       TODO: Upload audio file to Firebase storage and obtain URL for use in
-        VoiceCapsule construction to log in database
+        VoiceCapsule construction to log in database; storage path
+        --relative to Firebase Storage should be provided--
     */
+
+    this.uploadToStorage();
 
     // Add a new entry with the appropriate details to sent capsules
     sender_capsules.update(<String, dynamic>{
