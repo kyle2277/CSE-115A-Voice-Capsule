@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -118,6 +119,13 @@ class ApplicationState extends ChangeNotifier {
           .createUserWithEmailAndPassword(email: email, password: password).then((value) {
         firebase_user = FirebaseAuth.instance.currentUser;
         populateUserContacts(firebase_user!.uid);
+
+        // Create entries in Cloud Firestore for a fresh entry
+        CollectionReference all_users = FirebaseFirestore.instance
+            .collection('users');
+
+        all_users.doc(firebase_user!.uid).set({'test': 'something'});
+
       });
       await credential.user!.updateDisplayName(displayName);
       // todo check that email is valid (ie not already in use by another account), erroneously transfers to home card after failed registration

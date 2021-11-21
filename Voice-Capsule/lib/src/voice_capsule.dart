@@ -70,6 +70,7 @@ class VoiceCapsule {
       capsule_name : {
         'open_date_time': open_time,
         'sender_uid': senderUID,
+        'storage_path': this.audioFileUrl,
         'url': 'gs://something',
       }
     });

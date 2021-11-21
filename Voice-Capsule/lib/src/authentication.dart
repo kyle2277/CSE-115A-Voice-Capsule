@@ -295,23 +295,34 @@ class _RegisterFormState extends State<RegisterForm> {
   }
 
   // Add data to the database for a newly registered user
-  void registerUser()
-  {
-    CollectionReference all_users = FirebaseFirestore.instance
-        .collection('users');
-
-    // Add entry for a user
-    all_users.add({
-      firebase_user!.uid : {
-        'contacts': {
-          'email': 'uid',
-          'email_2': 'uid_2',
-        },
-        'email': firebase_user!.email,
-        'uid': firebase_user!.uid,
-      }
-    });
-  }
+  // void registerUser()
+  // {
+  //   CollectionReference all_users = FirebaseFirestore.instance
+  //       .collection('users');
+  //
+  //   all_users.add(firebase_user!.uid);
+    //
+    // all_users.doc(firebase_user!.uid).update({
+    //   'contacts': {
+    //     'email': 'uid',
+    //     'email_2': 'uid_2',
+    //   },
+    //   'email': firebase_user!.email,
+    //   'uid': firebase_user!.uid,
+    // });
+    //
+    // // Add entry for a user
+    // all_users.add({
+    //   firebase_user!.uid : {
+    //     'contacts': {
+    //       'email': 'uid',
+    //       'email_2': 'uid_2',
+    //     },
+    //     'email': firebase_user!.email,
+    //     'uid': firebase_user!.uid,
+    //   }
+    // });
+  // }
 
   @override
   Widget build(BuildContext context) {
