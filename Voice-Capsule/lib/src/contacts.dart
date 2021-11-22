@@ -25,22 +25,32 @@ class _ContactsSlideState extends State<ContactsSlide>{
             child : const Text('Add Friends'),
             onPressed : () {
               Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AddFriendsScreen())
+                  context,
+                  MaterialPageRoute(builder: (context) => const AddFriendsScreen())
               );
             },
           ),
+
           Expanded(
-            child: ListView.builder(
-              itemCount: friends.length,
-              itemBuilder: (context, index) {
-                return Card(
-                  child: ListTile(
-                    title : Text(friends[index])
-                  )
-                );
-              }
-            )
+              child: ListView.builder(
+                  itemCount: friends.length,
+                  itemBuilder: (context, index) {
+                    return Card(
+                        child: ListTile(
+                            title : Text(friends[index])
+                        )
+                    );
+                  }
+              )
+          ),
+          TextButton(
+            child : const Text('Friend Requests'),
+            onPressed : () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const FriendRequestScreen())
+              );
+            },
           ),
         ]
     );
@@ -56,6 +66,31 @@ class AddFriendsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Add Friends"),
+        centerTitle: true,
+        backgroundColor: Colors.purple,
+      ),
+      body: Center(
+        child: Column (
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Page showing Friend Requests
+class FriendRequestScreen extends StatelessWidget {
+  const FriendRequestScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Friend Requests"),
         centerTitle: true,
         backgroundColor: Colors.purple,
       ),
