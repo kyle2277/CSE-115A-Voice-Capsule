@@ -16,9 +16,6 @@ import 'src/widgets.dart';
 import 'src/profile.dart';
 import 'dart:collection';
 
-// Info for currently signed in user
-// TODO: Daniel why did you remove this?
-User? firebase_user;
 // Current user's contacts
 LinkedHashMap<String, String> currentUserContacts = LinkedHashMap<String, String>();
 
