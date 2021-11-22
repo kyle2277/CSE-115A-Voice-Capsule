@@ -285,9 +285,16 @@ class _SenderScreenState extends State<SenderScreen> {
             SimplePlayback(audioFileUrl: widget.audioFileUrl),
             //BasicDateTimeField(currentSelection: widget.currentSelection),
             Padding(
-              padding: const EdgeInsets.only(left: 20.0, right: 20.0),
+              padding: const EdgeInsets.only(left: 75.0, right: 75.0),
               child: DateTimeField(
-                decoration: InputDecoration(hintText: 'No selection'),
+                decoration: InputDecoration(
+                    icon: Icon(Icons.calendar_today),
+                    labelText: 'Selected date',
+                    labelStyle: TextStyle(
+                      fontSize: 20,
+                      color: Colors.purple,
+                    ),
+                ),
                 format: widget.dateTimeFormat,
                 onShowPicker: (context, currentValue) async {
                   final date = await showDatePicker(
@@ -318,13 +325,13 @@ class _SenderScreenState extends State<SenderScreen> {
             SizedBox(
               height: 10,
             ),
-            Text(
-              'Selected date: ${widget.currentDateTimeSelection != null ? widget.dateTimeFormat.format(widget.currentDateTimeSelection!) : "No Selection"}',
-              textScaleFactor: 1.5,
-            ),
-            SizedBox(
-              height: 10,
-            ),
+            // Text(
+            //   'Selected date: ${widget.currentDateTimeSelection != null ? widget.dateTimeFormat.format(widget.currentDateTimeSelection!) : "No Selection"}',
+            //   textScaleFactor: 1.5,
+            // ),
+            // SizedBox(
+            //   height: 10,
+            // ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -366,8 +373,15 @@ class _SenderScreenState extends State<SenderScreen> {
                 ),
               ]
             ),
+            SizedBox(
+              height: 10,
+            ),
             OutlinedButton(
               child: Text('SEND'),
+              style: OutlinedButton.styleFrom(
+                  primary: Colors.white,
+                  backgroundColor: Colors.purple,
+              ),
               onPressed: () {
                 /*
                  TODO: Create a VoiceCapsule object and invoke sendToDatabase()

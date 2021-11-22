@@ -113,8 +113,20 @@ class VoiceCapsule {
 
   // Get voice note of given ID from the database
   // Must provide sender and receiver UIDs
+  //
+  // How should we get the date using this function? Should we at all?
   static VoiceCapsule? fetchFromDatabase(String capsuleID, String senderUID, String receiverUID) {
     // Todo: get this info from the database
+
+    // Construct the file name path we want to obtain
+    String targetPath = '${receiverUID}/';
+
+    // Search for that in Firebase Storage
+
+    // Download the file and save to local storage
+
+    // Extract information and form a VoiceCapsule object
+
     String audioFileUrl = "";
     DateTime openDateTime = DateTime.now();
     return VoiceCapsule(senderUID, receiverUID, openDateTime, audioFileUrl);
