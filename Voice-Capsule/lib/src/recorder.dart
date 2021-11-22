@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math';
@@ -9,12 +8,9 @@ import 'package:flutter_sound_platform_interface/flutter_sound_platform_interfac
 import 'package:permission_handler/permission_handler.dart';
 import 'package:intl/intl.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
-import 'package:voice_capsule/src/voice_capsule.dart';
-import 'authentication.dart';
-import 'date_time_picker.dart';
+import 'voice_capsule.dart';
 import 'playback.dart';
 import 'dart:collection';
-
 import 'utils.dart';
 
 /*
@@ -286,17 +282,17 @@ class _SenderScreenState extends State<SenderScreen> {
             SimplePlayback(audioFileUrl: widget.audioFileUrl),
             //BasicDateTimeField(currentSelection: widget.currentSelection),
             Padding(
-              padding: const EdgeInsets.only(left: 75.0, right: 75.0),
+              padding: const EdgeInsets.only(left: 65.0, right: 65.0, bottom: 10.0),
               child: DateTimeField(
                 decoration: InputDecoration(
                     icon: Icon(Icons.calendar_today),
-                    labelText: 'Selected date',
+                    labelText: 'Click to select open date',
                     labelStyle: TextStyle(
                       fontSize: 20,
                       color: Colors.purple,
                     ),
                 ),
-                format: widget.dateTimeFormat,
+                format: DATE_TIME_FORMAT,
                 // how to clear selection when x is pressed?
                 onShowPicker: (context, currentValue) async {
                   final date = await showDatePicker(
@@ -389,26 +385,21 @@ class _SenderScreenState extends State<SenderScreen> {
 
                 // If time and date is null, throw error before doing anything
                 if(widget.currentDateTimeSelection == null) {
-                  showAlertDialog_ERROR(context, 'Receipt date must be specified');
+                  showAlertDialog_ERROR(context, 'Open date must be specified');
                 } else {
                   // Instantiate a voice capsule for sending
                   VoiceCapsule voCap = VoiceCapsule(
                       senderID!,
                       receiverID!,
                       widget.currentDateTimeSelection!,
-                      fileName
+                      "",  // TODO: Firebase Storage path
+                      fileName,
                   );
 
                   // Send the voice capsule to the database
                   voCap.sendToDatabase();
-
-                  String message = "Sender: Myself\n"
-                      "Sender UID: ${senderID}\n"
-                      "Receiver: ${widget.contacts[receiverID]}\n"
-                      "Receiver UID: ${receiverID}\n"
-                      "Open Date/Time: ${widget.currentDateTimeSelection != null ? widget.dateTimeFormat.format(widget.currentDateTimeSelection!) : ""}\n\n"
-                      "You have pressed send!";
-                  showAlertDialog_OK(context, message);
+                  showToast_quick(context, "Voice Capsule sent!", duration: 4);
+                  Navigator.pop(context);
                 }
               },
             ),

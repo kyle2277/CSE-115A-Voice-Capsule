@@ -1,21 +1,12 @@
 import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
-import 'package:path_provider/path_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'dart:io';
 import 'utils.dart';
-import 'authentication.dart';
-import 'dart:typed_data';
 import 'package:intl/intl.dart';
-import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
-import 'date_time_picker.dart';
-
 
 /*
 Voice Capsules .data file format:
@@ -25,8 +16,6 @@ open date/time
 firebase storage path
 local file name
  */
-
-
 
 class VoiceCapsule {
   String senderUID;
@@ -59,12 +48,12 @@ class VoiceCapsule {
     firebase_storage.FirebaseStorage storage = firebase_storage.FirebaseStorage.instance;
 
     // Get file path to the file that was just recorded
-    String filePath = '/data/user/0/com.ucsc.voice_capsule/cache/recorded_file.mp4';
+    String filePath = '$CAPSULES_DIRECTORY/recorded_file.mp4';
     File file = File(filePath);
 
     // Upload to the receiver's folder for fetching by the receiver
     firebase_storage.UploadTask uploadTask = storage.ref()
-        .child('${this.receiverUID}/outgoing_${sanitizeString(time.toString())}.mp4')
+        .child('${receiverUID}/outgoing_${sanitizeString(receiverUID + "_" + time.toString())}.mp4')
         .putFile(file);
 
     uploadTask.then((result) async {
@@ -158,7 +147,7 @@ class VoiceCapsule {
     print("Local File Name: $localFileName");
     String receiverUID = FirebaseAuth.instance.currentUser!.uid;
     VoiceCapsule newCapsule = VoiceCapsule(senderUID, receiverUID, openDateTime, firebaseStoragePath, localFileName);
-    String capsuleDatFileName = "$CAPSULES_DIRECTORY${localFileName.split('.').first}.data";
+    String capsuleDatFileName = "$CAPSULES_DIRECTORY/${localFileName.split('.').first}.data";
     print("CapsuleDatFileName: $capsuleDatFileName");
     File dataFile = File(capsuleDatFileName);
     // if dat file already exists, capsule doesn't need to be downloaded from database
@@ -177,7 +166,7 @@ class VoiceCapsule {
   Future<bool> fetchFromDatabase() async {
     firebase_storage.FirebaseStorage storage = firebase_storage.FirebaseStorage.instance;
     firebase_storage.Reference ref = storage.ref().child(firebaseStoragePath);
-    String saveURL = '$CAPSULES_DIRECTORY$localFileName';
+    String saveURL = '$CAPSULES_DIRECTORY/$localFileName';
     File saveFile = File(saveURL);
     if(await saveFile.exists()) {
       return false;
@@ -201,5 +190,4 @@ class VoiceCapsule {
 
   @override
   int get hashCode => localFileName.hashCode ^ firebaseStoragePath.hashCode;
-
 }

@@ -4,8 +4,8 @@ import 'package:intl/intl.dart';
  * Utility functions for general app UI features
  */
 
-final dateTimeFormat = DateFormat("MM-dd-yyyy, hh:mm a");
-const String CAPSULES_DIRECTORY = "/data/user/0/com.ucsc.voice_capsule/cache/";
+final DATE_TIME_FORMAT = DateFormat("MM-dd-yyyy, hh:mm a");
+const String CAPSULES_DIRECTORY = "/data/user/0/com.ucsc.voice_capsule/cache";
 
 // Shows "snackbar" style popup with the given message and an OK button
 // Default duration of 5 seconds
