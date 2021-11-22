@@ -5,7 +5,7 @@ import 'widgets.dart';
 
 
 // Info for currently signed in user
-User? firebase_user;
+User? firebaseUser;
 
 /*
  * Class for authenticating login requests to Firebase
