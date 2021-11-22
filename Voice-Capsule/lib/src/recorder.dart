@@ -320,11 +320,6 @@ class _SenderScreenState extends State<SenderScreen> {
                 },
               ),
             ),
-            Text(
-              'Selected date: ${widget.currentDateTimeSelection != null ? widget.currentDateTimeSelection! : "No Selection"}',
-              //'Selected date: ${widget.currentDateTimeSelection != null ? dateTimeFormat.format(widget.currentDateTimeSelection!) : "No Selection"}',
-              textScaleFactor: 1.5,
-            ),
             SizedBox(
               height: 10,
             ),

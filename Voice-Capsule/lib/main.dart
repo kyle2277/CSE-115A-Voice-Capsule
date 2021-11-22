@@ -155,7 +155,7 @@ class ApplicationState extends ChangeNotifier {
           .collection('add_friends');
 
       add_friends.doc('all_users').set({
-        'all_users' : {firebase_user!.email : firebase_user!.uid},
+        '${firebase_user!.email}' : {'${displayName}' : firebase_user!.uid,},
       }, SetOptions(merge: true));
 
       await credential.user!.updateDisplayName(displayName);
