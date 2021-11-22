@@ -14,7 +14,6 @@ import 'date_time_picker.dart';
 
 
 class VoiceCapsule {
-
   String senderUID;
   String receiverUID;
   DateTime openDateTime;
@@ -41,7 +40,7 @@ class VoiceCapsule {
 
     // Upload to the receiver's folder for fetching by the receiver
     firebase_storage.UploadTask uploadTask = storage.ref()
-        .child('${this.receiverUID}/capsule_${firebase_user!.uid}_${open_date_time}.mp4')
+        .child('${this.receiverUID}/capsule_${this.senderUID}_${open_date_time}.mp4')
         .putFile(file);
 
     uploadTask.then((result) async {
@@ -76,7 +75,8 @@ class VoiceCapsule {
     final String open_time = formatter_db.format(this.openDateTime);
     final String open_time_formatted = formatter_file.format(this.openDateTime);
 
-    final String capsule_name = 'capsule_${firebase_user!.uid}_${open_time_formatted}';
+    // Format is <who receives capsule>/capsule_<who sends capsule>_<open time>.mp4
+    final String capsule_name = 'capsule_${this.senderUID}_${open_time_formatted}';
 
     // Upload the voice capsule just recorded onto Firebase storage
     this.uploadToStorage();
@@ -94,8 +94,7 @@ class VoiceCapsule {
       capsule_name : {
         'open_date_time': open_time,
         'sender_uid': senderUID,
-        // Format is <who receives capsule>/capsule_<who sends capsule>_<open time>.mp4
-        'storage_path': '${receiverUID}/capsule_${senderUID}_${open_time_formatted}.mp4',
+        'storage_path': '${receiverUID}/${capsule_name}.mp4',
       }
     });
 
