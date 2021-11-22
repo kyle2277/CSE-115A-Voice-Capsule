@@ -42,6 +42,7 @@ void showToast_quick(BuildContext context, String message, {double duration = 2}
   );
 }
 
+// Might roll these up into one showAlertDialog that can be customized?
 Future<void> showAlertDialog_OK(BuildContext context, String message) async {
   return showDialog<void>(
     context: context,
@@ -66,6 +67,41 @@ Future<void> showAlertDialog_OK(BuildContext context, String message) async {
       );
     },
   );
+}
+
+Future<void> showAlertDialog_ERROR(BuildContext context, String message) async {
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: false, // user must tap button!
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Send Error'),
+        content: SingleChildScrollView(
+          child: Text(
+            message,
+            textScaleFactor: 1.00,
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('OK'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+// Replaces ' ', '/', '.', ':' characters in a string so it can be used as a file path
+String sanitizeString(String input) {
+  String output = input.replaceAll(' ', '_');
+  output = output.replaceAll('/', '_');
+  output = output.replaceAll('.', '-');
+  output = output.replaceAll(':', '-');
+  return output;
 }
 
 final double MILLIS_IN_A_SECOND = 1000;

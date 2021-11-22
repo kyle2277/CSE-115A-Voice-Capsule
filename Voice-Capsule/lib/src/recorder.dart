@@ -296,6 +296,7 @@ class _SenderScreenState extends State<SenderScreen> {
                     ),
                 ),
                 format: widget.dateTimeFormat,
+                // how to clear selection when x is pressed?
                 onShowPicker: (context, currentValue) async {
                   final date = await showDatePicker(
                       context: context,
@@ -325,13 +326,6 @@ class _SenderScreenState extends State<SenderScreen> {
             SizedBox(
               height: 10,
             ),
-            // Text(
-            //   'Selected date: ${widget.currentDateTimeSelection != null ? widget.dateTimeFormat.format(widget.currentDateTimeSelection!) : "No Selection"}',
-            //   textScaleFactor: 1.5,
-            // ),
-            // SizedBox(
-            //   height: 10,
-            // ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -383,39 +377,33 @@ class _SenderScreenState extends State<SenderScreen> {
                   backgroundColor: Colors.purple,
               ),
               onPressed: () {
-                /*
-                 TODO: Create a VoiceCapsule object and invoke sendToDatabase()
-                  x Get senderID from widget.contacts["Myself"]
-                  x Get recieverID from widget.contacts[widget.recipient]
-                  x Get file name from widget.audioFileUrl
-                  x Get capsule ID from database (not sure how yet)
-                  **save url?
-                */
-
-                // if date time selection is null (not set), throw error
-
                 String? senderID = widget.contacts["Myself"];
                 String? receiverID = widget.contacts[widget.recipient];
                 String? fileName = widget.audioFileUrl;
 
-                // Instantiate a voice capsule for sending
-                VoiceCapsule voCap = VoiceCapsule(
-                    senderID!,
-                    receiverID!,
-                    widget.currentDateTimeSelection!,
-                    fileName
-                );
+                // If time and date is null, throw error before doing anything
+                if(widget.currentDateTimeSelection == null) {
+                  showAlertDialog_ERROR(context, 'Receipt date must be specified');
+                } else {
+                  // Instantiate a voice capsule for sending
+                  VoiceCapsule voCap = VoiceCapsule(
+                      senderID!,
+                      receiverID!,
+                      widget.currentDateTimeSelection!,
+                      fileName
+                  );
 
-                // Send the voice capsule to the database
-                voCap.sendToDatabase();
+                  // Send the voice capsule to the database
+                  voCap.sendToDatabase();
 
-                String message = "Sender: Myself\n"
-                    "Sender UID: ${senderID}\n"
-                    "Receiver: ${widget.contacts[receiverID]}\n"
-                    "Receiver UID: ${receiverID}\n"
-                    "Open Date/Time: ${widget.currentDateTimeSelection != null ? widget.dateTimeFormat.format(widget.currentDateTimeSelection!) : ""}\n\n"
-                    "You have pressed send!";
-                showAlertDialog_OK(context, message);
+                  String message = "Sender: Myself\n"
+                      "Sender UID: ${senderID}\n"
+                      "Receiver: ${widget.contacts[receiverID]}\n"
+                      "Receiver UID: ${receiverID}\n"
+                      "Open Date/Time: ${widget.currentDateTimeSelection != null ? widget.dateTimeFormat.format(widget.currentDateTimeSelection!) : ""}\n\n"
+                      "You have pressed send!";
+                  showAlertDialog_OK(context, message);
+                }
               },
             ),
           ],

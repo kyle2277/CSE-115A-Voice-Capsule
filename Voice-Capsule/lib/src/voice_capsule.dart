@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:voice_capsule/src/utils.dart';
 import 'authentication.dart';
 import 'dart:typed_data';
 import 'package:intl/intl.dart';
@@ -26,11 +27,7 @@ class VoiceCapsule {
   VoiceCapsule(this.senderUID, this.receiverUID, this.openDateTime, this.audioFileUrl);
 
   // Uploads the selected voice capsule into storage
-  Future<void> uploadToStorage() async {
-    // Prepare formatting
-    final DateFormat formatter = DateFormat('yyyy-MM-dd_HH-mm-ss');
-    final String open_date_time = formatter.format(openDateTime);
-
+  Future<void> uploadToStorage(DateTime time) async {
     // Get current instance of Firebase storage for the user
     firebase_storage.FirebaseStorage storage = firebase_storage.FirebaseStorage.instance;
 
@@ -40,7 +37,7 @@ class VoiceCapsule {
 
     // Upload to the receiver's folder for fetching by the receiver
     firebase_storage.UploadTask uploadTask = storage.ref()
-        .child('${this.receiverUID}/capsule_${this.senderUID}_${open_date_time}.mp4')
+        .child('${this.receiverUID}/outgoing_${sanitizeString(time.toString())}.mp4')
         .putFile(file);
 
     uploadTask.then((result) async {
@@ -50,10 +47,6 @@ class VoiceCapsule {
 
   // Store voice capsule in database
   Future<bool> sendToDatabase() async {
-    // if(capsuleID.isEmpty) {
-    //   return false;
-    // }
-
     // Grab reference to the users collection
     CollectionReference all_users = FirebaseFirestore.instance
         .collection('users');
@@ -69,17 +62,19 @@ class VoiceCapsule {
         .doc('pending_capsules');
 
     // Use open time to create a distinct name for the file uploaded
-    final DateFormat formatter_file = DateFormat('yyyy-MM-dd_HH-mm-ss');
     final DateFormat formatter_db = DateFormat('yyyy-MM-dd HH:mm:ss');
 
+    // Obtain the current time at which the capsule is sent
+    DateTime current_time = DateTime.now();
+
     final String open_time = formatter_db.format(this.openDateTime);
-    final String open_time_formatted = formatter_file.format(this.openDateTime);
 
-    // Format is <who receives capsule>/capsule_<who sends capsule>_<open time>.mp4
-    final String capsule_name = 'capsule_${this.senderUID}_${open_time_formatted}';
+    // Format is <who receives capsule>/outgoing_<who sends capsule>_<creation_time>.mp4
+    final String capsule_name = 'outgoing_${this.senderUID}_${sanitizeString(current_time.toString())}';
 
-    // Upload the voice capsule just recorded onto Firebase storage
-    this.uploadToStorage();
+    // Upload the voice capsule just recorded onto Firebase storage, using
+    // the same time indicated earlier
+    this.uploadToStorage(current_time);
 
     // Add a new entry with the appropriate details to sent capsules
     sender_capsules.update(<String, dynamic>{
@@ -117,16 +112,6 @@ class VoiceCapsule {
   // How should we get the date using this function? Should we at all?
   static VoiceCapsule? fetchFromDatabase(String capsuleID, String senderUID, String receiverUID) {
     // Todo: get this info from the database
-
-    // Construct the file name path we want to obtain
-    String targetPath = '${receiverUID}/';
-
-    // Search for that in Firebase Storage
-
-    // Download the file and save to local storage
-
-    // Extract information and form a VoiceCapsule object
-
     String audioFileUrl = "";
     DateTime openDateTime = DateTime.now();
     return VoiceCapsule(senderUID, receiverUID, openDateTime, audioFileUrl);
