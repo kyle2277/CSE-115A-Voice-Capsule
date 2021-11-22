@@ -10,7 +10,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:path/path.dart';
 
 import 'utils.dart';
+import 'authentication.dart';
 import 'voice_capsule.dart';
+
 
 /*
  * Capsules page
@@ -32,7 +34,13 @@ class _CapsulesSlideState extends State<CapsulesSlide>{
 
   // Initially load capsules from local .dat files
   Future<void> loadCapsules() async {
-    Directory dir = Directory(CAPSULES_DIRECTORY);
+    print("Loading CAPSULES");
+    Directory dir = Directory("$CAPSULES_DIRECTORY/${firebaseUser!.uid}");
+    // If user directory doesn't exist, create it and return
+    if(!await dir.exists()) {
+      await dir.create();
+      return;
+    }
     for(var entity in dir.listSync(recursive: false)) {
       if(entity is File) {
         String fileName = basename(entity.path);

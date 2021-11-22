@@ -70,7 +70,7 @@ class ApplicationState extends ChangeNotifier {
   // Fetch contacts for given userID from database
   void populateUserContacts(String userID) {
     currentUserContacts.clear();
-    currentUserContacts["Myself"] = firebase_user!.uid;
+    currentUserContacts["Myself"] = firebaseUser!.uid;
     currentUserContacts["Robert"] = "1";
     currentUserContacts["Thomas"] = "2";
     currentUserContacts["Vivianne"] = "3";
@@ -86,9 +86,9 @@ class ApplicationState extends ChangeNotifier {
         email: email,
         password: password,
       ).then((value) {
-        firebase_user = FirebaseAuth.instance.currentUser;
+        firebaseUser = FirebaseAuth.instance.currentUser;
         // Todo: fetch user contacts from database and populate contacts map with <User name, UserID> key-values
-        populateUserContacts(firebase_user!.uid);
+        populateUserContacts(firebaseUser!.uid);
       });
       // Hack so that LoginCard is in loggedOut state next time signOut() is called
       _loginState = ApplicationLoginState.loggedOut;
@@ -120,28 +120,28 @@ class ApplicationState extends ChangeNotifier {
     try {
       var credential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password).then((value) {
-        firebase_user = FirebaseAuth.instance.currentUser;
-        populateUserContacts(firebase_user!.uid);
+        firebaseUser = FirebaseAuth.instance.currentUser;
+        populateUserContacts(firebaseUser!.uid);
 
         // Create entries in Cloud Firestore for a fresh entry
         CollectionReference all_users = FirebaseFirestore.instance
             .collection('users');
 
         // Initializes the contacts, requests, and uid fields for a new account
-        all_users.doc(firebase_user!.uid).set({
+        all_users.doc(firebaseUser!.uid).set({
           'contacts': {},
-          'email': firebase_user!.email,
+          'email': firebaseUser!.email,
           'requests': {},
-          'uid': firebase_user!.uid,
+          'uid': firebaseUser!.uid,
         });
 
         // Initializes the capsule listings for new users
-        all_users.doc(firebase_user!.uid)
+        all_users.doc(firebaseUser!.uid)
             .collection('capsules')
             .doc('pending_capsules')
             .set({});
 
-        all_users.doc(firebase_user!.uid)
+        all_users.doc(firebaseUser!.uid)
             .collection('capsules')
             .doc('sent_capsules')
             .set({});
@@ -152,7 +152,7 @@ class ApplicationState extends ChangeNotifier {
           .collection('add_friends');
 
       add_friends.doc('all_users').set({
-        '${firebase_user!.email}' : {'${displayName}' : firebase_user!.uid,},
+        '${firebaseUser!.email}' : {'${displayName}' : firebaseUser!.uid,},
       }, SetOptions(merge: true));
 
       await credential.user!.updateDisplayName(displayName);
@@ -269,8 +269,8 @@ class _HomeCardState extends State<HomeCard>{
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Voice Capsule Test',
-          //'User ID: ${firebase_user?.uid ?? 'none'}',
+          'Voice Capsule',
+          //'User ID: ${firebaseUser!.uid}',
           //textScaleFactor: 0.75,
         ),
         centerTitle: true,

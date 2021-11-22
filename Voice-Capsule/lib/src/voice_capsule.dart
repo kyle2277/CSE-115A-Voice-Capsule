@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:io';
 import 'utils.dart';
+import 'authentication.dart';
 import 'package:intl/intl.dart';
 
 /*
@@ -25,7 +26,6 @@ class VoiceCapsule {
   String localFileName;
   // Firebase instances
   static final firebaseInstance = FirebaseFirestore.instance;
-  static final User firebaseUser = FirebaseAuth.instance.currentUser!;
   VoiceCapsule(this.senderUID, this.receiverUID, this.openDateTime, this.firebaseStoragePath, this.localFileName);
 
   static Future<VoiceCapsule?> newCapsuleFromDataFile(String dataFilePath) async {
@@ -114,7 +114,7 @@ class VoiceCapsule {
   // Returns a list of voice capsule IDs available for the given user to download
   static Future<List<VoiceCapsule>> checkForCapsules(String userID) async {
     List<VoiceCapsule> pendingCapsules = <VoiceCapsule>[];
-    var queryResult = await firebaseInstance.collection("users").doc(firebaseUser.uid).collection("capsules").doc("pending_capsules").get();
+    var queryResult = await firebaseInstance.collection("users").doc(firebaseUser!.uid).collection("capsules").doc("pending_capsules").get();
     final Map<String, dynamic> map = queryResult.data()!;
     print("Capsules pending in database: ${map.length}");
     // For each capsules in the map, check if its open date has been surpassed
@@ -147,7 +147,7 @@ class VoiceCapsule {
     print("Local File Name: $localFileName");
     String receiverUID = FirebaseAuth.instance.currentUser!.uid;
     VoiceCapsule newCapsule = VoiceCapsule(senderUID, receiverUID, openDateTime, firebaseStoragePath, localFileName);
-    String capsuleDatFileName = "$CAPSULES_DIRECTORY/${localFileName.split('.').first}.data";
+    String capsuleDatFileName = "$CAPSULES_DIRECTORY/${firebaseUser!.uid}/${localFileName.split('.').first}.data";
     print("CapsuleDatFileName: $capsuleDatFileName");
     File dataFile = File(capsuleDatFileName);
     // if dat file already exists, capsule doesn't need to be downloaded from database
@@ -166,8 +166,14 @@ class VoiceCapsule {
   Future<bool> fetchFromDatabase() async {
     firebase_storage.FirebaseStorage storage = firebase_storage.FirebaseStorage.instance;
     firebase_storage.Reference ref = storage.ref().child(firebaseStoragePath);
-    String saveURL = '$CAPSULES_DIRECTORY/$localFileName';
-    File saveFile = File(saveURL);
+    String saveDirPath = '$CAPSULES_DIRECTORY/${firebaseUser!.uid}';
+    // Ensure directory exists
+    Directory dir = Directory(saveDirPath);
+    if(!await dir.exists()) {
+      await dir.create();
+    }
+    String saveFilePath = "$saveDirPath/$localFileName";
+    File saveFile = File(saveFilePath);
     if(await saveFile.exists()) {
       return false;
     }
