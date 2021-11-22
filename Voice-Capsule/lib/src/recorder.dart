@@ -34,7 +34,7 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
   static const int MAX_RECORDING_MILLIS = MAX_RECORDING_MINUTES * 60 * 1000;
   // Audio codec
   Codec _codec = Codec.aacMP4;
-  String filePath = "outgoing_" + sanitizeString(DateTime.now().toString()) + ".mp4";
+  String _filePath = "recorded_file.mp4";
   // "?" makes nullable type
   FlutterSoundRecorder? recorder = FlutterSoundRecorder();
   bool _recorderIsInitialized = false;
@@ -114,7 +114,7 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
     // Clear path to last recorded file
     _recordedUrl = null;
     await recorder!.startRecorder(
-      toFile: filePath,
+      toFile: _filePath,
       codec: _codec,
     )
         .then((value) {

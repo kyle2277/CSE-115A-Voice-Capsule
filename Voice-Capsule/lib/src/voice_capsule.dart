@@ -4,8 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'dart:io';
-import 'package:http/http.dart' as http;
-import 'dart:typed_data';
 import 'utils.dart';
 
 /*
@@ -24,7 +22,6 @@ class VoiceCapsule {
   DateTime openDateTime;
   String firebaseStoragePath;
   String localFileName;
-  //Uint8List audioFileBytes = Uint8List(1024);
   // Firebase instances
   static final firebaseInstance = FirebaseFirestore.instance;
   static final User firebaseUser = FirebaseAuth.instance.currentUser!;
@@ -45,22 +42,7 @@ class VoiceCapsule {
   }
 
   // Store voice capsule in database
-  // TODO: remove for merge with dev
   static Future<void> sendToDatabase() async {
-    String localFilePath = '${CAPSULES_DIRECTORY}outgoing_2021-11-18_20-57-03-403812.mp4';
-    String storageFilePath = 'outgoing_2021-11-18_20-57-03-403812.mp4';
-    firebase_storage.FirebaseStorage storage = firebase_storage.FirebaseStorage.instance;
-    firebase_storage.Reference ref = storage.ref().child(storageFilePath);
-    firebase_storage.UploadTask uploadTask = ref.putFile(
-      File(localFilePath),
-      firebase_storage.SettableMetadata(
-        contentType: "video/mp4",
-      ),
-    );
-    uploadTask.then((res) async {
-      String downloadURL = await res.ref.getDownloadURL();
-      print(downloadURL);
-    });
   }
 
   // Returns a list of voice capsule IDs available for the given user to download
