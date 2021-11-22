@@ -107,9 +107,6 @@ class VoiceCapsule {
   }
 
   // Get voice note of given ID from the database
-  // Must provide sender and receiver UIDs
-  //
-  // How should we get the date using this function? Should we at all?
   static VoiceCapsule? fetchFromDatabase(String capsuleID, String senderUID, String receiverUID) {
     // Todo: get this info from the database
     String audioFileUrl = "";
