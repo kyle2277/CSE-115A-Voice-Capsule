@@ -399,7 +399,7 @@ class _SenderScreenState extends State<SenderScreen> {
                 String? fileName = widget.audioFileUrl;
 
                 // Instantiate a voice capsule for sending
-                VoiceCapsule vo_cap = VoiceCapsule(
+                VoiceCapsule voCap = VoiceCapsule(
                     senderID!,
                     receiverID!,
                     widget.currentDateTimeSelection!,
@@ -407,7 +407,7 @@ class _SenderScreenState extends State<SenderScreen> {
                 );
 
                 // Send the voice capsule to the database
-                vo_cap.sendToDatabase();
+                voCap.sendToDatabase();
 
                 String message = "Sender: Myself\n"
                     "Sender UID: ${senderID}\n"
