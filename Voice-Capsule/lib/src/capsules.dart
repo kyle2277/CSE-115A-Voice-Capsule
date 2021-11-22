@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 import 'package:flutter_sound_platform_interface/flutter_sound_platform_interface.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'playback.dart';
 import 'voice_capsule.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:path/path.dart';
 
 import 'utils.dart';
+import 'voice_capsule.dart';
 
 /*
  * Capsules page
@@ -24,7 +27,74 @@ class CapsulesSlide extends StatefulWidget {
 
 
 class _CapsulesSlideState extends State<CapsulesSlide>{
-  static const List<String> capsules = ['recorded_file.mp4','recorded_file.mp4','recorded_file.mp4']; // list of available capsules
+  // List of available capsules
+  List<VoiceCapsule> capsules = [];
+
+  // Initially load capsules from local .dat files
+  Future<void> loadCapsules() async {
+    Directory dir = Directory(CAPSULES_DIRECTORY);
+    for(var entity in dir.listSync(recursive: false)) {
+      if(entity is File) {
+        String fileName = basename(entity.path);
+        String fileNameSplit = fileName.split('.').last;
+        if(fileNameSplit == "data") {
+          await VoiceCapsule.newCapsuleFromDataFile(entity.path).then((loadedCapsule) {
+            if(loadedCapsule != null) {
+              print("Loading capsule: ${loadedCapsule.localFileName}");
+              if(!capsules.contains(loadedCapsule)) {
+                setState(() {
+                  capsules.insert(0, loadedCapsule);
+                });
+              }
+            }
+          });
+        }
+      }
+    }
+  }
+
+  @override
+  @mustCallSuper
+  void initState() {
+    loadCapsules();
+    super.initState();
+  }
+
+  // Check if any capsules available, if so download from database
+  Future<void> checkForNewCapsules(BuildContext context) async {
+    String myUID = FirebaseAuth.instance.currentUser!.uid;
+    showToast_OK(context, "Loading...", duration:10000);
+    await VoiceCapsule.checkForCapsules(myUID).then((pendingCapsules) async {
+      if(pendingCapsules.isEmpty) {
+        print("No available capsules");
+        showToast_quick(context, "No new voice capsules", duration: 2);
+        return;
+      }
+      bool modified = false;
+      for(VoiceCapsule newCapsule in pendingCapsules) {
+        print("Available Capsule:");
+        print("Sender UID: ${newCapsule.senderUID}");
+        print("Storage file path: ${newCapsule.firebaseStoragePath}");
+        print("Local file name: ${newCapsule.localFileName}");
+        print("Open Date/Time: ${newCapsule.openDateTime}");
+        await newCapsule.fetchFromDatabase().then((success) {
+          if(success) {
+            modified = true;
+            // add to list of capsules
+            setState(() {
+              capsules.insert(0, newCapsule);
+            });
+          }
+        });
+      }
+      if(modified) {
+        showToast_quick(context, "New voice capsules received!", duration: 3);
+      } else {
+        showToast_quick(context, "No new voice capsules", duration: 2);
+      }
+    });
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,10 +107,11 @@ class _CapsulesSlideState extends State<CapsulesSlide>{
             itemBuilder: (context, index) {
               return Card(
                 child: ListTile(
-                  title:Text(capsules[index]) ,
+                  title:Text(capsules[index].toString()),
                   onTap : () {
                     Navigator.push(
                       context,
+                      // Send audio file to player using capsules[index]
                       MaterialPageRoute(builder: (context) => const PlaybackScreen()),
                     );
                   }
@@ -51,29 +122,8 @@ class _CapsulesSlideState extends State<CapsulesSlide>{
         ),
         RaisedButton(
           onPressed: () async {
-            //VoiceCapsule.sendToDatabase();
-
-            String myUID = FirebaseAuth.instance.currentUser!.uid;
-            showToast_OK(context, "Loading...", duration:10000);
-            await VoiceCapsule.checkForCapsules(myUID).then((capsules) {
-              if(capsules.isEmpty) {
-                print("No available capsules");
-                return;
-              }
-              for(Map<String, dynamic> capsule in capsules) {
-                String senderUID = capsule['sender_uid'];
-                String openDateTime_str = capsule['open_date_time'];
-                String directDownloadURL = capsule['url'];
-                String fileName = capsule['storage_path'];
-                print("Available Capsule:");
-                print("Sender UID: $senderUID");
-                print("Storage url: $directDownloadURL");
-                print("Storage file name: $fileName");
-                print("Open Date/Time: $openDateTime_str");
-                VoiceCapsule.fetchFromDatabase(fileName, senderUID, myUID);
-              }
+            await checkForNewCapsules(context).then((value) {
             });
-            ScaffoldMessenger.of(context).hideCurrentSnackBar();
           },
           color: Colors.grey[300],
           highlightColor: Colors.grey[300],

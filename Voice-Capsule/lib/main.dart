@@ -116,12 +116,11 @@ class ApplicationState extends ChangeNotifier {
   Future registerAccount(String email, String displayName, String password,
       void Function(FirebaseAuthException e) errorCallback) async {
     try {
-      var credential = await FirebaseAuth.instance
+      await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password).then((value) {
-        firebase_user = FirebaseAuth.instance.currentUser;
-        populateUserContacts(firebase_user!.uid);
-      });
-      await credential.user!.updateDisplayName(displayName);
+            firebase_user = FirebaseAuth.instance.currentUser;
+            populateUserContacts(firebase_user!.uid);
+          });
       // todo check that email is valid (ie not already in use by another account), erroneously transfers to home card after failed registration
       _loginState = ApplicationLoginState.loggedOut;
     } on FirebaseAuthException catch (e) {
