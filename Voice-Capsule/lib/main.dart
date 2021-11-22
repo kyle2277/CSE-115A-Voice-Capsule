@@ -147,6 +147,14 @@ class ApplicationState extends ChangeNotifier {
             .set({});
       });
 
+      // Adds user to the master list of all_users for the friend feature
+      CollectionReference add_friends = FirebaseFirestore.instance
+          .collection('add_friends');
+
+      add_friends.doc('all_users').set({
+        'all_users' : {firebase_user!.email : firebase_user!.uid},
+      }, SetOptions(merge: true));
+
       await credential.user!.updateDisplayName(displayName);
       // todo check that email is valid (ie not already in use by another account), erroneously transfers to home card after failed registration
       _loginState = ApplicationLoginState.loggedOut;
