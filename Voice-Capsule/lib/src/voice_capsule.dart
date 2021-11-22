@@ -1,12 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'dart:io';
-import 'package:http/http.dart' as http;
-import 'dart:typed_data';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:io';
 import 'utils.dart';
+import 'package:intl/intl.dart';
 
 /*
 Voice Capsules .data file format:
@@ -18,13 +18,11 @@ local file name
  */
 
 class VoiceCapsule {
-
   String senderUID;
   String receiverUID;
   DateTime openDateTime;
   String firebaseStoragePath;
   String localFileName;
-  //Uint8List audioFileBytes = Uint8List(1024);
   // Firebase instances
   static final firebaseInstance = FirebaseFirestore.instance;
   static final User firebaseUser = FirebaseAuth.instance.currentUser!;
@@ -44,23 +42,73 @@ class VoiceCapsule {
     return VoiceCapsule(senderUID, receiverUID, openDateTime, firebaseStoragePath, localFileName);
   }
 
-  // Store voice capsule in database
-  // TODO: remove for merge with dev
-  static Future<void> sendToDatabase() async {
-    String localFilePath = '${CAPSULES_DIRECTORY}outgoing_2021-11-18_20-57-03-403812.mp4';
-    String storageFilePath = 'outgoing_2021-11-18_20-57-03-403812.mp4';
+  // Uploads the selected voice capsule into storage
+  Future<void> uploadToStorage(DateTime time) async {
+    // Get current instance of Firebase storage for the user
     firebase_storage.FirebaseStorage storage = firebase_storage.FirebaseStorage.instance;
-    firebase_storage.Reference ref = storage.ref().child(storageFilePath);
-    firebase_storage.UploadTask uploadTask = ref.putFile(
-      File(localFilePath),
-      firebase_storage.SettableMetadata(
-        contentType: "video/mp4",
-      ),
-    );
-    uploadTask.then((res) async {
-      String downloadURL = await res.ref.getDownloadURL();
-      print(downloadURL);
+
+    // Get file path to the file that was just recorded
+    String filePath = '$CAPSULES_DIRECTORY/recorded_file.mp4';
+    File file = File(filePath);
+
+    // Upload to the receiver's folder for fetching by the receiver
+    firebase_storage.UploadTask uploadTask = storage.ref()
+        .child('${receiverUID}/outgoing_${sanitizeString(receiverUID + "_" + time.toString())}.mp4')
+        .putFile(file);
+
+    uploadTask.then((result) async {
+      return true;
     });
+  }
+
+  Future<bool> sendToDatabase() async {
+    // Grab reference to the users collection
+    CollectionReference all_users = FirebaseFirestore.instance
+        .collection('users');
+
+    // Obtain references to the sending and pending documents for each side
+    DocumentReference sender_capsules = all_users
+        .doc(this.senderUID)
+        .collection('capsules')
+        .doc('sent_capsules');
+    DocumentReference receiver_capsules = all_users
+        .doc(this.receiverUID)
+        .collection('capsules')
+        .doc('pending_capsules');
+
+    // Use open time to create a distinct name for the file uploaded
+    final DateFormat formatter_db = DateFormat('yyyy-MM-dd HH:mm:ss');
+
+    // Obtain the current time at which the capsule is sent
+    DateTime current_time = DateTime.now();
+
+    final String open_time = formatter_db.format(this.openDateTime);
+
+    // Format is <who receives capsule>/outgoing_<who sends capsule>_<creation_time>.mp4
+    final String capsule_name = 'outgoing_${this.senderUID}_${sanitizeString(current_time.toString())}';
+
+    // Upload the voice capsule just recorded onto Firebase storage, using
+    // the same time indicated earlier
+    this.uploadToStorage(current_time);
+
+    // Add a new entry with the appropriate details to sent capsules
+    sender_capsules.update(<String, dynamic>{
+      capsule_name : {
+        'open_date_time': open_time,
+        'receiver_uid': receiverUID,
+      },
+    });
+
+    // Add a new entry with the appropriate details to pending capsules
+    receiver_capsules.update(<String, dynamic>{
+      capsule_name : {
+        'open_date_time': open_time,
+        'sender_uid': senderUID,
+        'storage_path': '${receiverUID}/${capsule_name}.mp4',
+      }
+    });
+
+    return true;
   }
 
   // Returns a list of voice capsule IDs available for the given user to download
@@ -99,7 +147,7 @@ class VoiceCapsule {
     print("Local File Name: $localFileName");
     String receiverUID = FirebaseAuth.instance.currentUser!.uid;
     VoiceCapsule newCapsule = VoiceCapsule(senderUID, receiverUID, openDateTime, firebaseStoragePath, localFileName);
-    String capsuleDatFileName = "$CAPSULES_DIRECTORY${localFileName.split('.').first}.data";
+    String capsuleDatFileName = "$CAPSULES_DIRECTORY/${localFileName.split('.').first}.data";
     print("CapsuleDatFileName: $capsuleDatFileName");
     File dataFile = File(capsuleDatFileName);
     // if dat file already exists, capsule doesn't need to be downloaded from database
@@ -118,7 +166,7 @@ class VoiceCapsule {
   Future<bool> fetchFromDatabase() async {
     firebase_storage.FirebaseStorage storage = firebase_storage.FirebaseStorage.instance;
     firebase_storage.Reference ref = storage.ref().child(firebaseStoragePath);
-    String saveURL = '$CAPSULES_DIRECTORY$localFileName';
+    String saveURL = '$CAPSULES_DIRECTORY/$localFileName';
     File saveFile = File(saveURL);
     if(await saveFile.exists()) {
       return false;
@@ -142,5 +190,4 @@ class VoiceCapsule {
 
   @override
   int get hashCode => localFileName.hashCode ^ firebaseStoragePath.hashCode;
-
 }

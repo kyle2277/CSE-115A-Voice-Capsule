@@ -67,7 +67,7 @@ class _CapsulesSlideState extends State<CapsulesSlide>{
     await VoiceCapsule.checkForCapsules(myUID).then((pendingCapsules) async {
       if(pendingCapsules.isEmpty) {
         print("No available capsules");
-        showToast_quick(context, "No new voice capsules", duration: 2);
+        showToast_quick(context, "No new Voice Capsules", duration: 2);
         return;
       }
       bool modified = false;
@@ -88,9 +88,9 @@ class _CapsulesSlideState extends State<CapsulesSlide>{
         });
       }
       if(modified) {
-        showToast_quick(context, "New voice capsules received!", duration: 3);
+        showToast_quick(context, "New Voice Capsules received!", duration: 3);
       } else {
-        showToast_quick(context, "No new voice capsules", duration: 2);
+        showToast_quick(context, "No new Voice Capsules", duration: 2);
       }
     });
     ScaffoldMessenger.of(context).hideCurrentSnackBar();

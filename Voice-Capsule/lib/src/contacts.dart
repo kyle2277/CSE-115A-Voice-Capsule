@@ -252,3 +252,28 @@ class _FriendRequestState extends State<FriendRequestScreen> {
     );
   }
 }
+
+// Page showing Friend Requests
+class FriendRequestScreen extends StatelessWidget {
+  const FriendRequestScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Friend Requests"),
+        centerTitle: true,
+        backgroundColor: Colors.purple,
+      ),
+      body: Center(
+        child: Column (
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+
+          ],
+        ),
+      ),
+    );
+  }
+}

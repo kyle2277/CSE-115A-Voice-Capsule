@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'widgets.dart';
+
+
+// Info for currently signed in user
+User? firebase_user;
 
 /*
  * Class for authenticating login requests to Firebase
@@ -361,6 +366,7 @@ class _RegisterFormState extends State<RegisterForm> {
                       StyledButton(
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
+                            // Runs registerAccount for the ChangeNotifier widget
                             widget.registerAccount(
                               _emailController.text,
                               _displayNameController.text,
@@ -372,9 +378,7 @@ class _RegisterFormState extends State<RegisterForm> {
                                 widget.navToHome(context);
                               }
                             });
-
                           }
-
                         },
                         child: const Text('SAVE'),
                       ),
