@@ -399,11 +399,12 @@ class _SenderScreenState extends State<SenderScreen> {
                 String? fileName = widget.audioFileUrl;
 
                 // Instantiate a voice capsule for sending
-                VoiceCapsule vo_cap = new VoiceCapsule(
+                VoiceCapsule vo_cap = VoiceCapsule(
                     senderID!,
                     receiverID!,
                     widget.currentDateTimeSelection!,
-                    fileName);
+                    fileName
+                );
 
                 // Send the voice capsule to the database
                 vo_cap.sendToDatabase();
