@@ -1,15 +1,16 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:flutter_sound_platform_interface/flutter_sound_platform_interface.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:intl/intl.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
-import 'date_time_picker.dart';
+import 'voice_capsule.dart';
 import 'playback.dart';
 import 'dart:collection';
-
 import 'utils.dart';
 
 /*
@@ -19,6 +20,8 @@ import 'utils.dart';
 class SimpleRecorder extends StatefulWidget {
   SimpleRecorder({
     required this.contacts,
+    // will we need to pass in the firebase instance to pass into send screen
+    // through this argument?
   });
   // User contacts
   LinkedHashMap<String, String> contacts;
@@ -28,12 +31,12 @@ class SimpleRecorder extends StatefulWidget {
 
 class _SimpleRecorderState extends State<SimpleRecorder> {
 
-  static const int MAX_RECORDING_MINUTES = 1;
+  static const int MAX_RECORDING_MINUTES = 5;
   // min * sec/min * ms/sec = ms
   static const int MAX_RECORDING_MILLIS = MAX_RECORDING_MINUTES * 60 * 1000;
   // Audio codec
   Codec _codec = Codec.aacMP4;
-  String _filePath = 'recorded_file.mp4';
+  String _filePath = "recorded_file.mp4";
   // "?" makes nullable type
   FlutterSoundRecorder? recorder = FlutterSoundRecorder();
   bool _recorderIsInitialized = false;
@@ -230,6 +233,8 @@ class SenderScreen extends StatefulWidget {
   SenderScreen({
     required this.contacts,
     required this.audioFileUrl,
+    // will we need to pass in the firebase instance started in main to
+    // ensure we can send something here when ready to send?
   });
   // List of contacts
   LinkedHashMap<String, String> contacts;
@@ -239,7 +244,7 @@ class SenderScreen extends StatefulWidget {
   DateTime? currentDateTimeSelection;
   // Recipient selection
   String? recipient;
-  final dateTimeFormat = DateFormat("MM-dd-yyyy, hh:mm a");
+
 
   @override
   _SenderScreenState createState() => _SenderScreenState();
@@ -276,38 +281,48 @@ class _SenderScreenState extends State<SenderScreen> {
           children: [
             SimplePlayback(audioFileUrl: widget.audioFileUrl),
             //BasicDateTimeField(currentSelection: widget.currentSelection),
-            DateTimeField(
-              format: widget.dateTimeFormat,
-              onShowPicker: (context, currentValue) async {
-                final date = await showDatePicker(
-                    context: context,
-                    firstDate: DateTime(1900),
-                    initialDate: currentValue ?? DateTime.now(),
-                    lastDate: DateTime(2100));
-                if (date != null) {
-                  final time = await showTimePicker(
-                    context: context,
-                    initialTime:
-                    TimeOfDay.fromDateTime(currentValue ?? DateTime.now()),
-                  );
-                  DateTime fieldValue = DateTimeField.combine(date, time);
-                  setState(() {
-                    widget.currentDateTimeSelection = fieldValue;
-                  });
-                  return fieldValue;
-                } else {
-                  setState(() {
-                    widget.currentDateTimeSelection = currentValue ?? DateTime.now();
-                  });
-                  return currentValue;
-                }
-              },
-            ),
-            SizedBox(
-              height: 10,
+            Padding(
+              padding: const EdgeInsets.only(left: 65.0, right: 65.0, bottom: 10.0),
+              child: DateTimeField(
+                decoration: InputDecoration(
+                    icon: Icon(Icons.calendar_today),
+                    labelText: 'Click to select open date',
+                    labelStyle: TextStyle(
+                      fontSize: 20,
+                      color: Colors.purple,
+                    ),
+                ),
+                format: DATE_TIME_FORMAT,
+                // how to clear selection when x is pressed?
+                onShowPicker: (context, currentValue) async {
+                  final date = await showDatePicker(
+                      context: context,
+                      firstDate: DateTime(1900),
+                      initialDate: currentValue ?? DateTime.now(),
+                      lastDate: DateTime(2100));
+                  if (date != null) {
+                    final time = await showTimePicker(
+                      context: context,
+                      initialTime:
+                      TimeOfDay.fromDateTime(currentValue ?? DateTime.now()),
+                    );
+                    DateTime fieldValue = DateTimeField.combine(date, time);
+                    setState(() {
+                      widget.currentDateTimeSelection = fieldValue;
+                    });
+                    return fieldValue;
+                  } else {
+                    setState(() {
+                      widget.currentDateTimeSelection = currentValue ?? DateTime.now();
+                    });
+                    return currentValue;
+                  }
+                },
+              ),
             ),
             Text(
-              'Selected date: ${widget.currentDateTimeSelection != null ? widget.dateTimeFormat.format(widget.currentDateTimeSelection!) : "No Selection"}',
+              'Selected date: ${widget.currentDateTimeSelection != null ? widget.currentDateTimeSelection! : "No Selection"}',
+              //'Selected date: ${widget.currentDateTimeSelection != null ? dateTimeFormat.format(widget.currentDateTimeSelection!) : "No Selection"}',
               textScaleFactor: 1.5,
             ),
             SizedBox(
@@ -354,23 +369,38 @@ class _SenderScreenState extends State<SenderScreen> {
                 ),
               ]
             ),
+            SizedBox(
+              height: 10,
+            ),
             OutlinedButton(
               child: Text('SEND'),
+              style: OutlinedButton.styleFrom(
+                  primary: Colors.white,
+                  backgroundColor: Colors.purple,
+              ),
               onPressed: () {
-                /*
-                 TODO: Create a VoiceCapsule object and invoke sendToDatabase()
-                  * Get senderID from widget.contacts["Myself"]
-                  * Get recieverID from widget.contacts[widget.recipient]
-                  * Get file name from widget.audioFileUrl
-                  * Get capsule ID from database (not sure how yet)
-                */
-                String message = "Sender: Myself\n"
-                    "Sender UID: ${widget.contacts["Myself"]}\n"
-                    "Receiver: ${widget.recipient}\n"
-                    "Receiver UID: ${widget.contacts[widget.recipient]}\n"
-                    "Open Date/Time: ${widget.currentDateTimeSelection != null ? widget.dateTimeFormat.format(widget.currentDateTimeSelection!) : ""}\n\n"
-                    "You have pressed send!";
-                showAlertDialog_OK(context, message);
+                String? senderID = widget.contacts["Myself"];
+                String? receiverID = widget.contacts[widget.recipient];
+                String? fileName = widget.audioFileUrl;
+
+                // If time and date is null, throw error before doing anything
+                if(widget.currentDateTimeSelection == null) {
+                  showAlertDialog_ERROR(context, 'Open date must be specified');
+                } else {
+                  // Instantiate a voice capsule for sending
+                  VoiceCapsule voCap = VoiceCapsule(
+                      senderID!,
+                      receiverID!,
+                      widget.currentDateTimeSelection!,
+                      "",  // TODO: Firebase Storage path
+                      fileName,
+                  );
+
+                  // Send the voice capsule to the database
+                  voCap.sendToDatabase();
+                  showToast_quick(context, "Voice Capsule sent!", duration: 4);
+                  Navigator.pop(context);
+                }
               },
             ),
           ],
