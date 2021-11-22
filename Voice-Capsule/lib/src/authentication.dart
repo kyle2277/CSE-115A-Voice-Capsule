@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'widgets.dart';
 
-
 // Info for currently signed in user
 User? firebase_user;
 

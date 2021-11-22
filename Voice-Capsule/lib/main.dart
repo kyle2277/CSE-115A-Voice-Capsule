@@ -16,9 +16,6 @@ import 'src/widgets.dart';
 import 'src/profile.dart';
 import 'dart:collection';
 
-// Info for currently signed in user
-// TODO: Daniel why did you remove this?
-User? firebase_user;
 // Current user's contacts
 LinkedHashMap<String, String> currentUserContacts = LinkedHashMap<String, String>();
 
@@ -134,7 +131,7 @@ class ApplicationState extends ChangeNotifier {
         all_users.doc(firebase_user!.uid).set({
           'contacts': {},
           'email': firebase_user!.email,
-          'requests': [],
+          'requests': {},
           'uid': firebase_user!.uid,
         });
 
@@ -155,7 +152,7 @@ class ApplicationState extends ChangeNotifier {
           .collection('add_friends');
 
       add_friends.doc('all_users').set({
-        'all_users' : {firebase_user!.email : firebase_user!.uid},
+        '${firebase_user!.email}' : {'${displayName}' : firebase_user!.uid,},
       }, SetOptions(merge: true));
 
       await credential.user!.updateDisplayName(displayName);
