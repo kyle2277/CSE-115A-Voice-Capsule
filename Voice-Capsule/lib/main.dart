@@ -1,3 +1,5 @@
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -15,6 +17,7 @@ import 'src/profile.dart';
 import 'dart:collection';
 
 // Info for currently signed in user
+// TODO: Daniel why did you remove this?
 User? firebase_user;
 // Current user's contacts
 LinkedHashMap<String, String> currentUserContacts = LinkedHashMap<String, String>();
@@ -112,15 +115,50 @@ class ApplicationState extends ChangeNotifier {
     notifyListeners();
   }
 
-  // changed to authenticate new accounts modeled after signIn
+  // Creates new accounts using the provided email, desired display name,
+  // and password, as well as sets up the Cloud Firestore fields for
+  // them.
   Future registerAccount(String email, String displayName, String password,
       void Function(FirebaseAuthException e) errorCallback) async {
     try {
-      await FirebaseAuth.instance
+      var credential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password).then((value) {
-            firebase_user = FirebaseAuth.instance.currentUser;
-            populateUserContacts(firebase_user!.uid);
-          });
+        firebase_user = FirebaseAuth.instance.currentUser;
+        populateUserContacts(firebase_user!.uid);
+
+        // Create entries in Cloud Firestore for a fresh entry
+        CollectionReference all_users = FirebaseFirestore.instance
+            .collection('users');
+
+        // Initializes the contacts, requests, and uid fields for a new account
+        all_users.doc(firebase_user!.uid).set({
+          'contacts': {},
+          'email': firebase_user!.email,
+          'requests': [],
+          'uid': firebase_user!.uid,
+        });
+
+        // Initializes the capsule listings for new users
+        all_users.doc(firebase_user!.uid)
+            .collection('capsules')
+            .doc('pending_capsules')
+            .set({});
+
+        all_users.doc(firebase_user!.uid)
+            .collection('capsules')
+            .doc('sent_capsules')
+            .set({});
+      });
+
+      // Adds user to the master list of all_users for the friend feature
+      CollectionReference add_friends = FirebaseFirestore.instance
+          .collection('add_friends');
+
+      add_friends.doc('all_users').set({
+        'all_users' : {firebase_user!.email : firebase_user!.uid},
+      }, SetOptions(merge: true));
+
+      await credential.user!.updateDisplayName(displayName);
       // todo check that email is valid (ie not already in use by another account), erroneously transfers to home card after failed registration
       _loginState = ApplicationLoginState.loggedOut;
     } on FirebaseAuthException catch (e) {
