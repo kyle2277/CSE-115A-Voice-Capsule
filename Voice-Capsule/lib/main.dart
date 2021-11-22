@@ -131,7 +131,7 @@ class ApplicationState extends ChangeNotifier {
         all_users.doc(firebase_user!.uid).set({
           'contacts': {},
           'email': firebase_user!.email,
-          'requests': [],
+          'requests': {},
           'uid': firebase_user!.uid,
         });
 
