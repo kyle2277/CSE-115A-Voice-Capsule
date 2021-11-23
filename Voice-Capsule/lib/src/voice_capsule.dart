@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart' as fireStorage;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:io';
@@ -197,7 +198,7 @@ class VoiceCapsule {
   Future<void> delete() async {
     print("Deleting $localFileName and associated data file...");
     // receiverUID should be current user UID
-    String audioFilePath = "$CAPSULES_DIRECTORY/${receiverUID}/$localFileName";
+    String audioFilePath = "$CAPSULES_DIRECTORY/$receiverUID/$localFileName";
     print(audioFilePath);
     String dataFilePath = audioFilePath.split(".mp4").first;
     dataFilePath += ".data";
@@ -220,6 +221,39 @@ class VoiceCapsule {
 
   }
 
+  // Saves voice capsule audio file to device downloads folder
+  // Android only
+  Future<bool> saveToDownloads() async {
+    var status = await Permission.storage.request();
+    if(status != PermissionStatus.granted) {
+      throw StoragePermissionException('Storage permission not granted');
+    }
+    String audioFilePath = "$CAPSULES_DIRECTORY/$receiverUID/$localFileName";
+    String saveFileName = "Voice-Capsule_${sanitizeString(senderName)}_${sanitizeString(openDateTime.toString())}.mp4";
+    String saveFilePath = "$ANDROID_DOWNLOADS_PATH/$saveFileName";
+    print("Want to save $localFileName to device Downloads folder...");
+    // print("Download file name: $saveFileName");
+    // print("Voice capsule path: $audioFilePath");
+    // print("Download file path: $saveFilePath");
+    File audioFile = File(audioFilePath);
+    File saveFile = File(saveFilePath);
+    // Append (x) to end of filename to make it unique if file already exists
+    int i = 1;
+    while(await saveFile.exists()) {
+      RegExp splitPathRegExp = RegExp(r"\(.*\)\.mp4|\.mp4");
+      saveFilePath = "${saveFilePath.split(splitPathRegExp).first}($i).mp4";
+      saveFile = File(saveFilePath);
+      i += 1;
+    }
+    print("Saving to $saveFilePath");
+    if(!await audioFile.exists()) {  // Should never happen
+      print("ERROR: Cannot download Voice Capsule, audio file DOES NOT EXIST.");
+      return false;
+    }
+    await audioFile.copy(saveFilePath);
+    return true;
+  }
+
   // TODO: change when creating final capsule UI
   String toString() {
     return senderName;
@@ -234,4 +268,19 @@ class VoiceCapsule {
 
   @override
   int get hashCode => localFileName.hashCode ^ firebaseStoragePath.hashCode;
+}
+
+// Storage permissions
+class _StorageException implements Exception {
+  final String _message;
+
+  _StorageException(this._message);
+
+  String get message => _message;
+}
+
+// Permission to access storage was not granted
+class StoragePermissionException extends _StorageException {
+  //  Permission to record was not granted
+  StoragePermissionException(String message) : super(message);
 }

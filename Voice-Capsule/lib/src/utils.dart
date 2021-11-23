@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 final DATE_TIME_FORMAT = DateFormat("MM-dd-yyyy, hh:mm a");
 const String CAPSULES_DIRECTORY = "/data/user/0/com.ucsc.voice_capsule/cache";
+const String ANDROID_DOWNLOADS_PATH = "/storage/emulated/0/Download";
 
 // Shows "snackbar" style popup with the given message and an OK button
 // Default duration of 5 seconds

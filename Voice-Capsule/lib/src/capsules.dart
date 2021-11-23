@@ -97,7 +97,7 @@ class _CapsulesSlideState extends State<CapsulesSlide>{
         });
       }
       if(modified) {
-        showToast_quick(context, "New Voice Capsules received!", duration: 3);
+        showToast_quick(context, "New Voice Capsules received!", duration: 2);
       } else {
         showToast_quick(context, "No new Voice Capsules", duration: 2);
       }
@@ -121,12 +121,21 @@ class _CapsulesSlideState extends State<CapsulesSlide>{
                       children: [
                         IconButton(
                           icon: Icon(Icons.save_alt),
-                          onPressed: (() {
-
+                          iconSize: 22,
+                          onPressed: (() async {
+                            VoiceCapsule selected = capsules[index];
+                            await selected.saveToDownloads().then((success) {
+                              if(success) {
+                                showToast_quick(context, "Voice Capsule saved to downloads folder", duration:2);
+                              } else {
+                                showToast_quick(context, "Failed to download Voice Capsule", duration:2);
+                              }
+                            });
                           }),
                         ),
                         IconButton(
                           icon: Icon(Icons.delete),
+                          iconSize: 22,
                           onPressed: () async {
                             VoiceCapsule selected = capsules[index];
                             String message = "If you've already opened it, selecting Yes will permanently delete this Voice Capsule from ${selected.senderName}.";
@@ -135,7 +144,7 @@ class _CapsulesSlideState extends State<CapsulesSlide>{
                               await selected.delete().then((value) {
                                 setState(() {
                                   capsules.remove(selected);
-                                  showToast_quick(context, "Voice Capsule deleted");
+                                  showToast_quick(context, "Voice Capsule deleted", duration:1);
                                 });
                               });
                             }
