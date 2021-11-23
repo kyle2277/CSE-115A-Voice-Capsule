@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:firebase_storage/firebase_storage.dart' as fireStorage;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -19,14 +19,18 @@ local file name
  */
 
 class VoiceCapsule {
+  String senderName;
   String senderUID;
+  String receiverName;
   String receiverUID;
   DateTime openDateTime;
   String firebaseStoragePath;
   String localFileName;
+  bool opened;
   // Firebase instances
   static final firebaseInstance = FirebaseFirestore.instance;
-  VoiceCapsule(this.senderUID, this.receiverUID, this.openDateTime, this.firebaseStoragePath, this.localFileName);
+  static final firebaseStorageInstance = fireStorage.FirebaseStorage.instance;
+  VoiceCapsule(this.senderName, this.senderUID, this.receiverName, this.receiverUID, this.openDateTime, this.firebaseStoragePath, this.localFileName, this.opened);
 
   static Future<VoiceCapsule?> newCapsuleFromDataFile(String dataFilePath) async {
     File inputDataFile = File(dataFilePath);
@@ -34,26 +38,28 @@ class VoiceCapsule {
       return null;
     }
     List<String> lines = await inputDataFile.readAsLines();
-    String senderUID = lines[0];
-    String receiverUID = lines[1];
-    DateTime openDateTime = DateTime.parse(lines[2]);
-    String firebaseStoragePath = lines[3];
-    String localFileName = lines[4];
-    return VoiceCapsule(senderUID, receiverUID, openDateTime, firebaseStoragePath, localFileName);
+    String senderName = lines[0];
+    String senderUID = lines[1];
+    String receiverName = lines[2];
+    String receiverUID = lines[3];
+    DateTime openDateTime = DateTime.parse(lines[4]);
+    String firebaseStoragePath = lines[5];
+    String localFileName = lines[6];
+    bool opened = lines[7].contains("true");
+    return VoiceCapsule(senderName, senderUID, receiverName, receiverUID, openDateTime, firebaseStoragePath, localFileName, opened);
   }
 
   // Uploads the selected voice capsule into storage
   Future<void> uploadToStorage(DateTime time) async {
-    // Get current instance of Firebase storage for the user
-    firebase_storage.FirebaseStorage storage = firebase_storage.FirebaseStorage.instance;
 
     // Get file path to the file that was just recorded
     String filePath = '$CAPSULES_DIRECTORY/recorded_file.mp4';
     File file = File(filePath);
 
     // Upload to the receiver's folder for fetching by the receiver
-    firebase_storage.UploadTask uploadTask = storage.ref()
-        .child('${receiverUID}/outgoing_${sanitizeString(receiverUID + "_" + time.toString())}.mp4')
+    // TODO: File naming not consistent with sendToDatabase() "<who receives capsule>/outgoing_<who sends capsule>_<creation_time>.mp4"
+    fireStorage.UploadTask uploadTask = firebaseStorageInstance.ref()
+        .child(firebaseStoragePath)
         .putFile(file);
 
     uploadTask.then((result) async {
@@ -77,34 +83,39 @@ class VoiceCapsule {
         .doc('pending_capsules');
 
     // Use open time to create a distinct name for the file uploaded
-    final DateFormat formatter_db = DateFormat('yyyy-MM-dd HH:mm:ss');
+    final DateFormat formatterDB = DateFormat('yyyy-MM-dd HH:mm:ss');
 
     // Obtain the current time at which the capsule is sent
-    DateTime current_time = DateTime.now();
+    DateTime currentTime = DateTime.now();
 
-    final String open_time = formatter_db.format(this.openDateTime);
+    final String openTime = formatterDB.format(this.openDateTime);
 
     // Format is <who receives capsule>/outgoing_<who sends capsule>_<creation_time>.mp4
-    final String capsule_name = 'outgoing_${this.senderUID}_${sanitizeString(current_time.toString())}';
+    final String capsuleName = 'outgoing_${this.senderUID}_${sanitizeString(currentTime.toString())}';
+    // Set path to file in firebase storage
+    firebaseStoragePath = "$receiverUID/$capsuleName.mp4";
 
     // Upload the voice capsule just recorded onto Firebase storage, using
     // the same time indicated earlier
-    this.uploadToStorage(current_time);
+    this.uploadToStorage(currentTime);
 
     // Add a new entry with the appropriate details to sent capsules
     sender_capsules.update(<String, dynamic>{
-      capsule_name : {
-        'open_date_time': open_time,
+      capsuleName : {
+        'send_date_time': DateTime.now().toString(),
+        'open_date_time': openTime,
+        'receiver_name': receiverName,
         'receiver_uid': receiverUID,
       },
     });
 
     // Add a new entry with the appropriate details to pending capsules
     receiver_capsules.update(<String, dynamic>{
-      capsule_name : {
-        'open_date_time': open_time,
+      capsuleName : {
+        'open_date_time': openTime,
+        'sender_name': myName!,
         'sender_uid': senderUID,
-        'storage_path': '${receiverUID}/${capsule_name}.mp4',
+        'storage_path': firebaseStoragePath,
       }
     });
 
@@ -140,13 +151,14 @@ class VoiceCapsule {
 
   // Adds new voice capsule object to capsules list and creates .dat file for it
   static Future<VoiceCapsule?> createCapsuleAndData(Map<String, dynamic> capsule) async {
+    String senderName = capsule['sender_name'];
     String senderUID = capsule['sender_uid'];
     DateTime openDateTime = DateTime.parse(capsule['open_date_time']);
     String firebaseStoragePath = capsule['storage_path'];
     String localFileName = "incoming${firebaseStoragePath.split("outgoing").last}";
     print("Local File Name: $localFileName");
     String receiverUID = FirebaseAuth.instance.currentUser!.uid;
-    VoiceCapsule newCapsule = VoiceCapsule(senderUID, receiverUID, openDateTime, firebaseStoragePath, localFileName);
+    VoiceCapsule newCapsule = VoiceCapsule(senderName, senderUID, myName!, receiverUID, openDateTime, firebaseStoragePath, localFileName, false);
     String capsuleDatFileName = "$CAPSULES_DIRECTORY/${firebaseUser!.uid}/${localFileName.split('.').first}.data";
     print("CapsuleDatFileName: $capsuleDatFileName");
     File dataFile = File(capsuleDatFileName);
@@ -155,7 +167,7 @@ class VoiceCapsule {
       return null;
     }
     await dataFile.create();
-    String capsuleData = "$senderUID\n$receiverUID\n${openDateTime.toString()}\n$firebaseStoragePath\n$localFileName";
+    String capsuleData = "$senderName\n$senderUID\n${myName!}\n$receiverUID\n${openDateTime.toString()}\n$firebaseStoragePath\n$localFileName\nfalse";
     await dataFile.writeAsString(capsuleData);
     return newCapsule;
   }
@@ -164,8 +176,7 @@ class VoiceCapsule {
   // Must provide sender and receiver UIDs
   // Returns true if capsule downloaded from database, false otherwise
   Future<bool> fetchFromDatabase() async {
-    firebase_storage.FirebaseStorage storage = firebase_storage.FirebaseStorage.instance;
-    firebase_storage.Reference ref = storage.ref().child(firebaseStoragePath);
+    fireStorage.Reference ref = firebaseStorageInstance.ref().child(firebaseStoragePath);
     String saveDirPath = '$CAPSULES_DIRECTORY/${firebaseUser!.uid}';
     // Ensure directory exists
     Directory dir = Directory(saveDirPath);
@@ -178,13 +189,40 @@ class VoiceCapsule {
       return false;
     }
     await saveFile.create();
-    firebase_storage.DownloadTask downloadFile = ref.writeToFile(saveFile);
+    fireStorage.DownloadTask downloadFile = ref.writeToFile(saveFile);
     return true;
+  }
+
+  // Deletes this voice capsule object from local storage
+  Future<void> delete() async {
+    print("Deleting $localFileName and associated data file...");
+    // receiverUID should be current user UID
+    String audioFilePath = "$CAPSULES_DIRECTORY/${receiverUID}/$localFileName";
+    print(audioFilePath);
+    String dataFilePath = audioFilePath.split(".mp4").first;
+    dataFilePath += ".data";
+    File audioFile = File(audioFilePath);
+    File dataFile = File(dataFilePath);
+    if(await audioFile.exists()) {
+      await audioFile.delete();
+    } else {
+      print("Delete error: no audio file found.");
+    }
+    if(await dataFile.exists()) {
+      await dataFile.delete();
+    } else{
+      print("Delete error: no data file found.");
+    }
+  }
+
+  // Deletes voice capsule entry from Firestore Database and audio file from Firebase Storage
+  Future<void> deleteFromDatabase() async {
+
   }
 
   // TODO: change when creating final capsule UI
   String toString() {
-    return localFileName;
+    return senderName;
   }
 
   // Override operators for comparing voice capsules

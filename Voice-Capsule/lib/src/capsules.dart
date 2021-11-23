@@ -81,6 +81,7 @@ class _CapsulesSlideState extends State<CapsulesSlide>{
       bool modified = false;
       for(VoiceCapsule newCapsule in pendingCapsules) {
         print("Available Capsule:");
+        print("Sender name: ${newCapsule.senderName}");
         print("Sender UID: ${newCapsule.senderUID}");
         print("Storage file path: ${newCapsule.firebaseStoragePath}");
         print("Local file name: ${newCapsule.localFileName}");
@@ -115,9 +116,43 @@ class _CapsulesSlideState extends State<CapsulesSlide>{
             itemBuilder: (context, index) {
               return Card(
                 child: ListTile(
-                  title:Text(capsules[index].toString()),
-                  onTap : () {
-                    Navigator.push(
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.save_alt),
+                          onPressed: (() {
+
+                          }),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete),
+                          onPressed: () async {
+                            VoiceCapsule selected = capsules[index];
+                            String message = "If you've already opened it, selecting Yes will permanently delete this Voice Capsule from ${selected.senderName}.";
+                            bool? yes = await showAlertDialog_YESNO(context, "Are you sure?", message, textScale: 1.25);
+                            if(yes!) {
+                              await selected.delete().then((value) {
+                                setState(() {
+                                  capsules.remove(selected);
+                                  showToast_quick(context, "Voice Capsule deleted");
+                                });
+                              });
+                            }
+                          },
+                        ),
+                      ]
+                    ),
+                    title:Text(
+                      "Capsule from",
+                      textScaleFactor: 0.9,
+                    ),
+                    subtitle: Text(
+                      capsules[index].toString(),
+                      textScaleFactor: 1.5,
+                    ),
+                    onTap : () {
+                      Navigator.push(
                       context,
                       // Send audio file to player using capsules[index]
                       MaterialPageRoute(builder: (context) => const PlaybackScreen()),

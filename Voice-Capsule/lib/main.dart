@@ -15,6 +15,7 @@ import 'src/playback.dart';
 import 'src/widgets.dart';
 import 'src/profile.dart';
 import 'dart:collection';
+import 'src/utils.dart';
 
 // Current user's contacts
 LinkedHashMap<String, String> currentUserContacts = LinkedHashMap<String, String>();
@@ -76,16 +77,34 @@ class ApplicationState extends ChangeNotifier {
     currentUserContacts["Vivianne"] = "3";
   }
 
+  // Sets user reference, name, and email globals in authentication.dart
+  Future setUserInformation(void Function(FirebaseAuthException e) errorCallback) async {
+    firebaseUser = FirebaseAuth.instance.currentUser;
+    try {
+      await FirebaseFirestore.instance.collection("users").doc(firebaseUser!.uid).get().then((queryResult) {
+        final Map<String, dynamic> map = queryResult.data()!;
+        myName = map['name'];
+        myEmail = map['email'];
+      });
+    } on FirebaseAuthException catch (e) {
+      errorCallback(e);
+      return e.message;
+    }
+  }
+
   Future signInWithEmailAndPassword(
-    String email,
-    String password,
-    void Function(FirebaseAuthException e) errorCallback,
+      String email,
+      String password,
+      void Function(FirebaseAuthException e) errorCallback,
+      void Function(FirebaseAuthException e) userInfoErrorCallback,
     ) async {
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       ).then((value) {
+        // Get user information from database
+        setUserInformation(userInfoErrorCallback);
         firebaseUser = FirebaseAuth.instance.currentUser;
         // Todo: fetch user contacts from database and populate contacts map with <User name, UserID> key-values
         populateUserContacts(firebaseUser!.uid);
@@ -118,17 +137,19 @@ class ApplicationState extends ChangeNotifier {
   Future registerAccount(String email, String displayName, String password,
       void Function(FirebaseAuthException e) errorCallback) async {
     try {
-      var credential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: email, password: password).then((value) {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password).then((value) {
+        // For new user, manually set user information globals
         firebaseUser = FirebaseAuth.instance.currentUser;
+        myName = displayName;
+        myEmail = email;
         populateUserContacts(firebaseUser!.uid);
 
         // Create entries in Cloud Firestore for a fresh entry
-        CollectionReference all_users = FirebaseFirestore.instance
-            .collection('users');
+        CollectionReference all_users = FirebaseFirestore.instance.collection('users');
 
         // Initializes the contacts, requests, and uid fields for a new account
         all_users.doc(firebaseUser!.uid).set({
+          'name': myName!,
           'contacts': {},
           'email': firebaseUser!.email,
           'requests': {},
@@ -154,8 +175,6 @@ class ApplicationState extends ChangeNotifier {
       add_friends.doc('all_users').set({
         '${firebaseUser!.email}' : {'${displayName}' : firebaseUser!.uid,},
       }, SetOptions(merge: true));
-
-      await credential.user!.updateDisplayName(displayName);
       // todo check that email is valid (ie not already in use by another account), erroneously transfers to home card after failed registration
       _loginState = ApplicationLoginState.loggedOut;
     } on FirebaseAuthException catch (e) {
@@ -269,9 +288,9 @@ class _HomeCardState extends State<HomeCard>{
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Voice Capsule',
-          //'User ID: ${firebaseUser!.uid}',
-          //textScaleFactor: 0.75,
+          //'Voice Capsule',
+          'User ID: ${firebaseUser!.uid}',
+          textScaleFactor: 0.75,
         ),
         centerTitle: true,
         backgroundColor: Colors.purple,

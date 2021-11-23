@@ -12,6 +12,7 @@ import 'voice_capsule.dart';
 import 'playback.dart';
 import 'dart:collection';
 import 'utils.dart';
+import 'authentication.dart';
 
 /*
  * Class for recording audio from device microphone
@@ -384,11 +385,14 @@ class _SenderScreenState extends State<SenderScreen> {
                 } else {
                   // Instantiate a voice capsule for sending
                   VoiceCapsule voCap = VoiceCapsule(
-                      senderID!,
-                      receiverID!,
-                      widget.currentDateTimeSelection!,
-                      "",  // TODO: Firebase Storage path
-                      fileName,
+                    myName!,
+                    senderID!,
+                    widget.recipient!,
+                    receiverID!,
+                    widget.currentDateTimeSelection!,
+                    "",  // Firebase Storage path
+                    fileName,
+                    false,
                   );
 
                   // Send the voice capsule to the database

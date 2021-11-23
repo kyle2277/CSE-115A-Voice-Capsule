@@ -46,13 +46,13 @@ void showToast_quick(BuildContext context, String message, {double duration = 2}
 }
 
 // Might roll these up into one showAlertDialog that can be customized?
-Future<void> showAlertDialog_OK(BuildContext context, String message) async {
+Future<void> showAlertDialog_OK(BuildContext context, String title, String message) async {
   return showDialog<void>(
     context: context,
     barrierDismissible: false, // user must tap button!
     builder: (BuildContext context) {
       return AlertDialog(
-        title: const Text('Send Capsule'),
+        title: Text(title),
         content: SingleChildScrollView(
           child: Text(
             message,
@@ -65,6 +65,48 @@ Future<void> showAlertDialog_OK(BuildContext context, String message) async {
             onPressed: () {
               Navigator.of(context).pop();
             },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+Future<bool?> showAlertDialog_YESNO(BuildContext context, String title, String message, {double textScale = 1.0}) async {
+  return showDialog<bool>(
+    context: context,
+    barrierDismissible: false, // user must tap button!
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(
+          title,
+          textScaleFactor: 1.25,
+        ),
+        content: SingleChildScrollView(
+          child: Text(
+            message,
+            textScaleFactor: textScale,
+          ),
+        ),
+        actionsAlignment: MainAxisAlignment.spaceBetween,
+        actions: <Widget>[
+          TextButton(
+            child: Text(
+              "Yes",
+              textScaleFactor: 1.5,
+            ),
+            onPressed: (() {
+              Navigator.pop(context, true);
+            }),
+          ),
+          TextButton(
+            child: Text(
+              "No",
+              textScaleFactor: 1.5,
+            ),
+            onPressed: (() {
+              Navigator.pop(context, false);
+            }),
           ),
         ],
       );

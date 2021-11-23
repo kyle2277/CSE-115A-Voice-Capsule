@@ -5,6 +5,8 @@ import 'widgets.dart';
 
 // Info for currently signed in user
 User? firebaseUser;
+String? myName;
+String? myEmail;
 
 /*
  * Class for authenticating login requests to Firebase
@@ -46,6 +48,7 @@ class Authentication extends StatelessWidget {
       String email,
       String password,
       void Function(Exception e) error,
+      void Function(Exception e) userInfoError,
       ) signInWithEmailAndPassword;
   final void Function() cancelRegistration;
   final void Function() cancelLogin;
@@ -120,7 +123,9 @@ class Authentication extends StatelessWidget {
           },
           login: (email, password) {
             return signInWithEmailAndPassword(email, password,
-                    (e) => _showErrorDialog(context, 'Failed to sign in', e));
+                    (e) => _showErrorDialog(context, 'Failed to sign in', e),
+                    (e) =>
+                    _showErrorDialog(context, 'Failed to reach database', e));
           },
           navToHome: navToHome,
         );
