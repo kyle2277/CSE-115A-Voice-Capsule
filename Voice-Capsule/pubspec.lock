@@ -292,7 +292,18 @@ packages:
   path_provider:
     dependency: "direct main"
     description:
+<<<<<<< Updated upstream
       name: path_provider
+=======
+      name: path_provider_android
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.9"
+  path_provider_ios:
+    dependency: transitive
+    description:
+      name: path_provider_ios
+>>>>>>> Stashed changes
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.7"
