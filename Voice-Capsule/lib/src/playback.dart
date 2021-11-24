@@ -10,8 +10,10 @@ class SimplePlayback extends StatefulWidget {
   //const SimplePlayback({Key? key}) : super(key: key);
   SimplePlayback({
     required this.audioFileUrl,
+    this.autoStart = false,
   });
   String audioFileUrl;
+  bool autoStart;
   @override
   _SimplePlaybackState createState() => _SimplePlaybackState();
 }
@@ -26,6 +28,28 @@ class _SimplePlaybackState extends State<SimplePlayback> {
   int duration = 0;
   StreamSubscription? _playerSubscription;
 
+  // Somewhat of a hack to get duration from player subscription
+  // Also has the ability to autostart the player somehow don't ask
+  Future<void> hackPlayer() async {
+    if(widget.autoStart) {
+      startPlayer();
+      await stopPlayer().then((value) {
+        setState(() {
+          _mPlayerIsInited = true;
+        });
+      });
+    } else {
+      await startPlayer().then((value) async {
+        await stopPlayer().then((value) {
+          setState(() {
+            _mPlayerIsInited = true;
+          });
+        });
+      });
+    }
+    print("PLAYER IS INITED");
+  }
+
   @override
   void initState() {
     print("RUNNING INIT");
@@ -38,14 +62,9 @@ class _SimplePlaybackState extends State<SimplePlayback> {
         });
       });
       _mPlayer!.setSubscriptionDuration(const Duration(milliseconds:100));
-      setState(() async {
+      setState(() {
         _mPlayer!.setVolume(1.0);
-        // Somewhat of a hack to get duration from player subscription
-        startPlayer();
-        await stopPlayer().then((value) {
-          _mPlayerIsInited = true;
-          print("PLAYER IS INITED");
-        });
+        hackPlayer();
       });
     });
   }

@@ -218,7 +218,18 @@ class VoiceCapsule {
 
   // Deletes voice capsule entry from Firestore Database and audio file from Firebase Storage
   Future<void> deleteFromDatabase() async {
-
+    String databaseCapsuleName = "outgoing_${(localFileName.split("incoming_").last).split(".mp4").first}";
+    CollectionReference all_users = firebaseInstance.collection('users');
+    DocumentReference receiver_capsules = all_users
+        .doc(receiverUID)
+        .collection('capsules')
+        .doc('pending_capsules');
+    receiver_capsules.update(<String, dynamic>{
+      databaseCapsuleName: FieldValue.delete()
+    }).whenComplete(() {
+      fireStorage.Reference ref = firebaseStorageInstance.ref().child(firebaseStoragePath);
+      ref.delete();
+    });
   }
 
   // Saves voice capsule audio file to device downloads folder
@@ -254,12 +265,17 @@ class VoiceCapsule {
     return true;
   }
 
-  // Sets 'opened' flag in the current VoiceCapsule object and in its respective .data file
-  Future<bool> setOpened() async {
+  // Sets 'opened' flag in the current VoiceCapsule object
+  // Call after setOpenAsync()
+  void setOpened() {
+    opened = true;
+  }
+
+  // Sets 'opened' in current VoiceCapsule object's respective .data file
+  Future<bool> writeOpenedToDataFile() async {
     if(opened) {
       return true;
     }
-    opened = true;
     String dataFilePath = "${getCapsuleFilePath().split(".mp4").first}.data";
     print("Data file path : $dataFilePath");
     File dataFile = File(dataFilePath);
@@ -275,8 +291,9 @@ class VoiceCapsule {
     return "$CAPSULES_DIRECTORY/$receiverUID/$localFileName";
   }
 
+  // String representation of a capsule is the sender's name
   String toString() {
-    return localFileName;
+    return senderName;
   }
 
   // Override operators for comparing voice capsules

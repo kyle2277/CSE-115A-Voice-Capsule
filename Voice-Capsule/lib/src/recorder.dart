@@ -136,7 +136,7 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
       print('File saved at: ${_recordedUrl}');
       if(recorder!.isStopped && _recordedUrl != null) {
         showToast_quick(context, 'Stopped recording', duration: 1);
-        showToast_OK(context, 'Recording saved to: $_recordedUrl');
+        showToast_OK(context, 'Recording saved to: $_recordedUrl', duration: 3);
       }
     });
 

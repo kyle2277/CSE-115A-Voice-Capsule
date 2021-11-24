@@ -70,7 +70,7 @@ class _CapsulesSlideState extends State<CapsulesSlide> with SingleTickerProvider
   void initState() {
     newCapsuleAnimationController = AnimationController(vsync: this, duration: const Duration(seconds: 2));
     newCapsuleAnimationController.repeat(reverse: true);
-    newCapsuleAnimation = Tween(begin: 0.95, end: 0.85).animate(newCapsuleAnimationController)..addListener(() {
+    newCapsuleAnimation = Tween(begin: 0.95, end: 0.8).animate(newCapsuleAnimationController)..addListener(() {
       setState(() {});
     });
     loadCapsules();
@@ -194,10 +194,17 @@ class _CapsulesSlideState extends State<CapsulesSlide> with SingleTickerProvider
                       capsules[index].toString(),
                       textScaleFactor: 1.5,
                     ),
-                    onTap : () {
-                      setState(() {
-                        capsules[index].setOpened();
-                      });
+                    onTap : () async {
+                      VoiceCapsule capsule = capsules[index];
+                      // If not opened, set as opened and delete from database
+                      if(!capsule.opened) {
+                        await capsule.writeOpenedToDataFile().then((value) async {
+                          setState(() {
+                            capsule.setOpened();
+                          });
+                          await capsules[index].deleteFromDatabase();
+                        });
+                      }
                       Navigator.push(
                         context,
                         // Send audio file to player using capsules[index]
@@ -243,7 +250,7 @@ class PlaybackScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SimplePlayback(audioFileUrl: 'recorded_file.mp4',),
+            SimplePlayback(audioFileUrl: 'recorded_file.mp4', autoStart: true),
           ],
         ),
       ),

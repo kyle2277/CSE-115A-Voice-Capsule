@@ -288,9 +288,9 @@ class _HomeCardState extends State<HomeCard>{
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          //'Voice Capsule',
-          'User ID: ${firebaseUser!.uid}',
-          textScaleFactor: 0.75,
+          'Voice Capsule',
+          //'User ID: ${firebaseUser!.uid}',
+          //textScaleFactor: 0.75,
         ),
         centerTitle: true,
         backgroundColor: Colors.purple,

@@ -14,7 +14,7 @@ void showToast_OK(BuildContext context, String message, {int duration = 5}) {
   final scaffold = ScaffoldMessenger.of(context);
   scaffold.showSnackBar(
     SnackBar(
-      duration: const Duration(seconds:5),
+      duration: Duration(seconds: duration),
       behavior: SnackBarBehavior.floating,
       content: Text(
           message,
