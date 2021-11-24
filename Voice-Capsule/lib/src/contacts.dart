@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:flutter/material.dart';
 import 'package:voice_capsule/src/widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -19,10 +17,10 @@ class ContactsSlide extends StatefulWidget {
   _ContactsSlideState createState() => _ContactsSlideState();
 }
 
-// TODO implement refesh button
 class _ContactsSlideState extends State<ContactsSlide>{
   Map<String, dynamic> friends = <String, dynamic>{}; // list of contacts
 
+  // constructor
   @override
   void initState() {
     firebaseUser = FirebaseAuth.instance.currentUser!; // instantiate the logged in user
@@ -56,7 +54,6 @@ class _ContactsSlideState extends State<ContactsSlide>{
                         .collection('users')
                         .doc(firebaseUser!.uid).get(); // get this user's document
 
-
                     Navigator.push( // push to the request page
                         context,
                         MaterialPageRoute(
@@ -70,7 +67,7 @@ class _ContactsSlideState extends State<ContactsSlide>{
               ]
           ),
           Expanded( // actual list of friends
-              child: friends.length==0 ? Header('No friends yet...') : ListView.builder(
+              child: ListView.builder(
                   itemCount: friends.length,
                   itemBuilder: (context, index) {
                     String email = friends.keys.elementAt(index); // get a specific friend's info
@@ -83,6 +80,18 @@ class _ContactsSlideState extends State<ContactsSlide>{
                   }
                   )
           ),
+          RaisedButton(
+            onPressed: () async {
+              await buildFriendsList().then((value) {
+              });
+            },
+            color: Colors.grey[300],
+            highlightColor: Colors.grey[300],
+            child: const Text("Refresh"),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(5),
+            ),
+          ),
         ]
     );
   }
@@ -94,24 +103,6 @@ class _ContactsSlideState extends State<ContactsSlide>{
         .doc(firebaseUser!.uid).get(); // get this user's document
     friends = thisUser['contacts']; // get this user's friend's list
     setState((){}); // refresh
-  }
-}
-
-// ensure that your friend exists
-// TODO make this able to handle sending a request to yourself or someone who is already a friend
-Future<void> verifyEmail(
-    String email,
-    void Function(FirebaseAuthException e) errorCallback,
-    ) async {
-  try {
-    var methods = await FirebaseAuth.instance.fetchSignInMethodsForEmail(email); // find email
-    if (!methods.contains('password')) { // should this email not exist
-      errorCallback(FirebaseAuthException(
-          code:'invalid-email',
-          message: 'This email is does not currently belong to a user account.'));
-    }
-  } on FirebaseAuthException catch (e) {
-    errorCallback(e); // send the error message
   }
 }
 
@@ -157,11 +148,16 @@ class FriendForm extends StatefulWidget {
   _FriendFormState createState() => _FriendFormState();
 }
 
+class CustomException implements Exception {
+  String title;
+  String message;
+  CustomException(this.title, this.message);
+}
+
 class _FriendFormState extends State<FriendForm> {
   final _formKey = GlobalKey<FormState>(); // global key that uniquely identifies the Form widget
   final _controller = TextEditingController(); // text from text field
 
-  // todo make sure you don't send yourself or a known contact a request
   @override
   Widget build(BuildContext context) {
     // Build a Form widget using the _formKey created above.
@@ -179,7 +175,7 @@ class _FriendFormState extends State<FriendForm> {
               ),
               validator: (value) {
                 if (value!.isEmpty) {
-                  return 'Enter their email address to continue';
+                  return 'Enter an email address to continue';
                 }
                 return null;
               },
@@ -195,34 +191,44 @@ class _FriendFormState extends State<FriendForm> {
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) { // make sure not empty
                       String otherEmail = _controller.text; // email we want to send to
-                      verifyEmail( // make sure that email exists
-                        otherEmail,
-                              (e) => _showErrorDialog(context, 'Invalid email', e),
-                      ).then((value) async{ // now, we send
+                      var thisUserRef = await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(firebaseUser!.uid).get(); // this user's doc
+
+                      var check = await verifyEmail(
+                          otherEmail,
+                          thisUserRef['email'],
+                          thisUserRef['contacts'],
+                          thisUserRef['requests']
+                      ); // do sanity checks
+
+                      if(check == true) { // now we can send
                         var allUsers = await FirebaseFirestore.instance
                             .collection('add_friends')
-                            .doc('all_users').get(); // document containing all usernames,emails,uids
-                        Map<String,dynamic> allUsersMap = allUsers.data()!; // obtaining it in map form
+                            .doc('all_users')
+                            .get(); // document containing all usernames,emails,uids
+                        Map<String, dynamic> allUsersMap = allUsers
+                            .data()!; // obtaining it in map form
 
-                        var otherUserUid = allUsersMap[otherEmail].values.toList();
+                        var otherUserUid = allUsersMap[otherEmail].values
+                            .toList(); // get uid
                         var otherUserPage = await FirebaseFirestore.instance
                             .collection('users')
-                            .doc(otherUserUid[0]).get(); // other user's doc containing friends,pending requests, etc
-                        Map <String, dynamic> requestMap = otherUserPage['requests']; // their pending requests
+                            .doc(otherUserUid[0])
+                            .get(); // other user's doc containing friends,pending requests, etc
+                        Map <String,
+                            dynamic> requestMap = otherUserPage['requests']; // their pending requests
 
-                        var thisUserRef = await FirebaseFirestore.instance
-                            .collection('users')
-                            .doc(firebaseUser!.uid).get(); // this user's doc
-                        var thisUsername = allUsersMap[thisUserRef['email']].keys.toList(); // this user's username
-
+                        var thisUsername = allUsersMap[thisUserRef['email']]
+                            .keys.toList(); // this user's username
                         requestMap[thisUserRef['email']] = thisUsername[0]; // add this user to other user's requests
                         FirebaseFirestore.instance
                             .collection('users')
                             .doc(otherUserUid[0]).update({
-                          'requests' : requestMap
-                        }); // push to data base
-                        // TODO implement nav to main screen
-                      });
+                          'requests': requestMap
+                        }); // push to database
+                        Navigator.of(context).pop(); // return to original screen
+                      }
                     }
                   },
                   child: const Text('REQUEST'),
@@ -235,8 +241,51 @@ class _FriendFormState extends State<FriendForm> {
     );
   }
 
+  // ensure that your friend exists, they are not already a contact, they are not yourself,
+  // and you dont have an outstanding request from them
+  Future<bool> verifyEmail(
+      String otherEmail,
+      String thisEmail,
+      Map<String,dynamic> thisContacts,
+      Map<String,dynamic> thisRequests,
+      ) async {
+    try {
+      try{ // check if formatting is good
+        await FirebaseAuth.instance.fetchSignInMethodsForEmail(otherEmail); // try email
+      } on FirebaseAuthException catch (e) {
+        throwException('Invalid email','The email address is badly formatted.');
+      }
+
+      if(otherEmail ==  thisEmail){ // check if same person
+        throwException('Invalid email','You cannot add yourself.');
+      }
+
+      var methods = await FirebaseAuth.instance.fetchSignInMethodsForEmail(otherEmail); // find email
+      if(methods.contains('password') == false){ // check other exists
+        throwException('Invalid email','This user does not exist.');
+      }
+
+      if(thisContacts[otherEmail] != null){ // check if friend
+        throwException('Invalid email','You are already friends.');
+      }
+
+      if(thisRequests[otherEmail] != null){ // check if in your requests
+        throwException('Invalid email','You already have a request from them.');
+      }
+    } on CustomException catch (e){
+      _showErrorDialog(context,e.title,e.message);
+      return false;
+    }
+    return true;
+  }
+
+  // creates the exception
+  void throwException(String title,String message) {
+    throw CustomException(title,message);
+  }
+
   // Sends error messages
-  void _showErrorDialog(BuildContext context, String title, Exception e) {
+  void _showErrorDialog(BuildContext context, String title, String message) {
     showDialog<void>(
       context: context,
       builder: (context) {
@@ -249,7 +298,7 @@ class _FriendFormState extends State<FriendForm> {
             child: ListBody(
               children: <Widget>[
                 Text( // the message obtained from verifyEmail()
-                  '${(e as dynamic).message}',
+                  message,
                   style: const TextStyle(fontSize: 18),
                 ),
               ],
