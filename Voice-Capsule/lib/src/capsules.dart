@@ -196,7 +196,7 @@ class _CapsulesSlideState extends State<CapsulesSlide> with SingleTickerProvider
                     ),
                     onTap : () {
                       setState(() {
-                        capsules[index].opened = true;
+                        capsules[index].setOpened();
                       });
                       Navigator.push(
                         context,

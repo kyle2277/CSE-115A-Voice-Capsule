@@ -46,7 +46,7 @@ class VoiceCapsule {
     DateTime openDateTime = DateTime.parse(lines[4]);
     String firebaseStoragePath = lines[5];
     String localFileName = lines[6];
-    bool opened = lines[7].contains("true");
+    bool opened = lines.length == 8;
     return VoiceCapsule(senderName, senderUID, receiverName, receiverUID, openDateTime, firebaseStoragePath, localFileName, opened);
   }
 
@@ -160,7 +160,7 @@ class VoiceCapsule {
     print("Local File Name: $localFileName");
     String receiverUID = FirebaseAuth.instance.currentUser!.uid;
     VoiceCapsule newCapsule = VoiceCapsule(senderName, senderUID, myName!, receiverUID, openDateTime, firebaseStoragePath, localFileName, false);
-    String capsuleDatFileName = "$CAPSULES_DIRECTORY/${firebaseUser!.uid}/${localFileName.split('.').first}.data";
+    String capsuleDatFileName = "${newCapsule.getCapsuleFilePath().split(".mp4").first}.data";
     print("CapsuleDatFileName: $capsuleDatFileName");
     File dataFile = File(capsuleDatFileName);
     // if dat file already exists, capsule doesn't need to be downloaded from database
@@ -168,7 +168,7 @@ class VoiceCapsule {
       return null;
     }
     await dataFile.create();
-    String capsuleData = "$senderName\n$senderUID\n${myName!}\n$receiverUID\n${openDateTime.toString()}\n$firebaseStoragePath\n$localFileName\nfalse";
+    String capsuleData = "$senderName\n$senderUID\n${myName!}\n$receiverUID\n${openDateTime.toString()}\n$firebaseStoragePath\n$localFileName";
     await dataFile.writeAsString(capsuleData);
     return newCapsule;
   }
@@ -198,7 +198,7 @@ class VoiceCapsule {
   Future<void> delete() async {
     print("Deleting $localFileName and associated data file...");
     // receiverUID should be current user UID
-    String audioFilePath = "$CAPSULES_DIRECTORY/$receiverUID/$localFileName";
+    String audioFilePath = getCapsuleFilePath();
     print(audioFilePath);
     String dataFilePath = audioFilePath.split(".mp4").first;
     dataFilePath += ".data";
@@ -228,7 +228,7 @@ class VoiceCapsule {
     if(status != PermissionStatus.granted) {
       throw StoragePermissionException('Storage permission not granted');
     }
-    String audioFilePath = "$CAPSULES_DIRECTORY/$receiverUID/$localFileName";
+    String audioFilePath = getCapsuleFilePath();
     String saveFileName = "Voice-Capsule_${sanitizeString(senderName)}_${sanitizeString(openDateTime.toString())}.mp4";
     String saveFilePath = "$ANDROID_DOWNLOADS_PATH/$saveFileName";
     print("Want to save $localFileName to device Downloads folder...");
@@ -254,9 +254,29 @@ class VoiceCapsule {
     return true;
   }
 
-  // TODO: change when creating final capsule UI
+  // Sets 'opened' flag in the current VoiceCapsule object and in its respective .data file
+  Future<bool> setOpened() async {
+    if(opened) {
+      return true;
+    }
+    opened = true;
+    String dataFilePath = "${getCapsuleFilePath().split(".mp4").first}.data";
+    print("Data file path : $dataFilePath");
+    File dataFile = File(dataFilePath);
+    if(!await dataFile.exists()) {  // Should never happen
+      print("ERROR: capsule .data file does not exist");
+      return false;
+    }
+    dataFile.writeAsString("\nopened", mode: FileMode.append);
+    return true;
+  }
+
+  String getCapsuleFilePath() {
+    return "$CAPSULES_DIRECTORY/$receiverUID/$localFileName";
+  }
+
   String toString() {
-    return senderName;
+    return localFileName;
   }
 
   // Override operators for comparing voice capsules
