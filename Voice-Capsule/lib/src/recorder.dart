@@ -12,6 +12,7 @@ import 'voice_capsule.dart';
 import 'playback.dart';
 import 'dart:collection';
 import 'utils.dart';
+import 'authentication.dart';
 
 /*
  * Class for recording audio from device microphone
@@ -20,8 +21,6 @@ import 'utils.dart';
 class SimpleRecorder extends StatefulWidget {
   SimpleRecorder({
     required this.contacts,
-    // will we need to pass in the firebase instance to pass into send screen
-    // through this argument?
   });
   // User contacts
   LinkedHashMap<String, String> contacts;
@@ -135,7 +134,7 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
       print('File saved at: ${_recordedUrl}');
       if(recorder!.isStopped && _recordedUrl != null) {
         showToast_quick(context, 'Stopped recording', duration: 1);
-        showToast_OK(context, 'Recording saved to: $_recordedUrl');
+        showToast_OK(context, 'Recording saved to: $_recordedUrl', duration: 3);
       }
     });
 
@@ -384,11 +383,14 @@ class _SenderScreenState extends State<SenderScreen> {
                 } else {
                   // Instantiate a voice capsule for sending
                   VoiceCapsule voCap = VoiceCapsule(
-                      senderID!,
-                      receiverID!,
-                      widget.currentDateTimeSelection!,
-                      "",  // TODO: Firebase Storage path
-                      fileName,
+                    myName!,
+                    senderID!,
+                    widget.recipient!,
+                    receiverID!,
+                    widget.currentDateTimeSelection!,
+                    "",  // Firebase Storage path
+                    fileName,
+                    false,
                   );
 
                   // Send the voice capsule to the database

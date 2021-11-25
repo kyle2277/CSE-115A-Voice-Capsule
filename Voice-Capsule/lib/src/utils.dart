@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 final DATE_TIME_FORMAT = DateFormat("MM-dd-yyyy, hh:mm a");
 const String CAPSULES_DIRECTORY = "/data/user/0/com.ucsc.voice_capsule/cache";
+const String ANDROID_DOWNLOADS_PATH = "/storage/emulated/0/Download";
 
 // Shows "snackbar" style popup with the given message and an OK button
 // Default duration of 5 seconds
@@ -13,7 +14,7 @@ void showToast_OK(BuildContext context, String message, {int duration = 5}) {
   final scaffold = ScaffoldMessenger.of(context);
   scaffold.showSnackBar(
     SnackBar(
-      duration: const Duration(seconds:5),
+      duration: Duration(seconds: duration),
       behavior: SnackBarBehavior.floating,
       content: Text(
           message,
@@ -46,13 +47,13 @@ void showToast_quick(BuildContext context, String message, {double duration = 2}
 }
 
 // Might roll these up into one showAlertDialog that can be customized?
-Future<void> showAlertDialog_OK(BuildContext context, String message) async {
+Future<void> showAlertDialog_OK(BuildContext context, String title, String message) async {
   return showDialog<void>(
     context: context,
     barrierDismissible: false, // user must tap button!
     builder: (BuildContext context) {
       return AlertDialog(
-        title: const Text('Send Capsule'),
+        title: Text(title),
         content: SingleChildScrollView(
           child: Text(
             message,
@@ -65,6 +66,48 @@ Future<void> showAlertDialog_OK(BuildContext context, String message) async {
             onPressed: () {
               Navigator.of(context).pop();
             },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+Future<bool?> showAlertDialog_YESNO(BuildContext context, String title, String message, {double textScale = 1.0}) async {
+  return showDialog<bool>(
+    context: context,
+    barrierDismissible: false, // user must tap button!
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(
+          title,
+          textScaleFactor: 1.25,
+        ),
+        content: SingleChildScrollView(
+          child: Text(
+            message,
+            textScaleFactor: textScale,
+          ),
+        ),
+        actionsAlignment: MainAxisAlignment.spaceBetween,
+        actions: <Widget>[
+          TextButton(
+            child: Text(
+              "Yes",
+              textScaleFactor: 1.5,
+            ),
+            onPressed: (() {
+              Navigator.pop(context, true);
+            }),
+          ),
+          TextButton(
+            child: Text(
+              "No",
+              textScaleFactor: 1.5,
+            ),
+            onPressed: (() {
+              Navigator.pop(context, false);
+            }),
           ),
         ],
       );

@@ -28,9 +28,12 @@ class CapsulesSlide extends StatefulWidget {
 }
 
 
-class _CapsulesSlideState extends State<CapsulesSlide>{
+class _CapsulesSlideState extends State<CapsulesSlide> with SingleTickerProviderStateMixin {
   // List of available capsules
   List<VoiceCapsule> capsules = [];
+
+  late AnimationController newCapsuleAnimationController;
+  late Animation newCapsuleAnimation;
 
   // Initially load capsules from local .dat files
   Future<void> loadCapsules() async {
@@ -63,9 +66,23 @@ class _CapsulesSlideState extends State<CapsulesSlide>{
 
   @override
   @mustCallSuper
+  // Override widget initState to initialize animation and load capsules from local storage
   void initState() {
+    newCapsuleAnimationController = AnimationController(vsync: this, duration: const Duration(seconds: 2));
+    newCapsuleAnimationController.repeat(reverse: true);
+    newCapsuleAnimation = Tween(begin: 0.95, end: 0.8).animate(newCapsuleAnimationController)..addListener(() {
+      setState(() {});
+    });
     loadCapsules();
     super.initState();
+  }
+
+  @override
+  @mustCallSuper
+  // Override widget dispose to terminate animation controller
+  void dispose() {
+    newCapsuleAnimationController.dispose();
+    super.dispose();
   }
 
   // Check if any capsules available, if so download from database
@@ -81,6 +98,7 @@ class _CapsulesSlideState extends State<CapsulesSlide>{
       bool modified = false;
       for(VoiceCapsule newCapsule in pendingCapsules) {
         print("Available Capsule:");
+        print("Sender name: ${newCapsule.senderName}");
         print("Sender UID: ${newCapsule.senderUID}");
         print("Storage file path: ${newCapsule.firebaseStoragePath}");
         print("Local file name: ${newCapsule.localFileName}");
@@ -96,7 +114,7 @@ class _CapsulesSlideState extends State<CapsulesSlide>{
         });
       }
       if(modified) {
-        showToast_quick(context, "New Voice Capsules received!", duration: 3);
+        showToast_quick(context, "New Voice Capsules received!", duration: 2);
       } else {
         showToast_quick(context, "No new Voice Capsules", duration: 2);
       }
@@ -104,26 +122,96 @@ class _CapsulesSlideState extends State<CapsulesSlide>{
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
 
+  // Returns title of capsule depending on whether it has been opened yet
+  String getCapsuleTitle(VoiceCapsule capsule) {
+    if(capsule.opened) {
+      return "Capsule from";
+    } else {
+      return "NEW Capsule from";
+    }
+  }
+
+  // Color generator for new capsule glow animation
+  Color getNewCapsuleColor(double lightness) {
+    HSLColor col = HSLColor.fromColor(Colors.purple);
+    col = col.withLightness(lightness);
+    return col.toColor();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Column (
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded (
+        Expanded(
           child: ListView.builder(
             itemCount: capsules.length,
             itemBuilder: (context, index) {
               return Card(
                 child: ListTile(
-                  title:Text(capsules[index].toString()),
-                  onTap : () {
-                    Navigator.push(
-                      context,
-                      // Send audio file to player using capsules[index]
-                      MaterialPageRoute(builder: (context) => const PlaybackScreen()),
-                    );
-                  }
-                )
+                    tileColor: capsules[index].opened ? Colors.white : getNewCapsuleColor(newCapsuleAnimation.value),
+                    trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.save_alt),
+                            iconSize: 22,
+                            onPressed: (() async {
+                              VoiceCapsule selected = capsules[index];
+                              await selected.saveToDownloads().then((success) {
+                                if(success) {
+                                  showToast_quick(context, "Voice Capsule saved to downloads folder", duration:2);
+                                } else {
+                                  showToast_quick(context, "Failed to download Voice Capsule", duration:2);
+                                }
+                              });
+                            }),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.delete),
+                            iconSize: 22,
+                            onPressed: () async {
+                              VoiceCapsule selected = capsules[index];
+                              String message = "If you've already opened it, selecting Yes will permanently delete this Voice Capsule from ${selected.senderName}.";
+                              bool? yes = await showAlertDialog_YESNO(context, "Are you sure?", message, textScale: 1.25);
+                              if(yes!) {
+                                await selected.delete().then((value) {
+                                  setState(() {
+                                    capsules.remove(selected);
+                                    showToast_quick(context, "Voice Capsule deleted", duration:1);
+                                  });
+                                });
+                              }
+                            },
+                          ),
+                        ]
+                    ),
+                    title:Text(
+                      getCapsuleTitle(capsules[index]),
+                      textScaleFactor: 0.9,
+                    ),
+                    subtitle: Text(
+                      capsules[index].toString(),
+                      textScaleFactor: 1.5,
+                    ),
+                    onTap : () async {
+                      VoiceCapsule capsule = capsules[index];
+                      // If not opened, set as opened and delete from database
+                      if(!capsule.opened) {
+                        await capsule.writeOpenedToDataFile().then((value) async {
+                          setState(() {
+                            capsule.setOpened();
+                          });
+                          await capsules[index].deleteFromDatabase();
+                        });
+                      }
+                      Navigator.push(
+                        context,
+                        // Send audio file to player using capsules[index]
+                        MaterialPageRoute(builder: (context) => const PlaybackScreen()),
+                      );
+                    }
+                ),
               );
             },
           ),
@@ -162,7 +250,7 @@ class PlaybackScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SimplePlayback(audioFileUrl: 'recorded_file.mp4',),
+            SimplePlayback(audioFileUrl: 'recorded_file.mp4', autoStart: true),
           ],
         ),
       ),
