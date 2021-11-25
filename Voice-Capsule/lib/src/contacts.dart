@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:voice_capsule/src/widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'authentication.dart';
 
 /*
  * Contacts page
  */
 
-User? firebaseUser; // for obtaining uid
+//User? firebaseUser; // for obtaining uid
 
 // Friends list
 class ContactsSlide extends StatefulWidget {
@@ -23,7 +24,6 @@ class _ContactsSlideState extends State<ContactsSlide>{
   // constructor
   @override
   void initState() {
-    firebaseUser = FirebaseAuth.instance.currentUser!; // instantiate the logged in user
     buildFriendsList(); // populate list of contacts
     super.initState();
   }
