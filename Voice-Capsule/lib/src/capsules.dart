@@ -140,10 +140,10 @@ class _CapsulesSlideState extends State<CapsulesSlide> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
-    return Column (
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded (
+        Expanded(
           child: ListView.builder(
             itemCount: capsules.length,
             itemBuilder: (context, index) {

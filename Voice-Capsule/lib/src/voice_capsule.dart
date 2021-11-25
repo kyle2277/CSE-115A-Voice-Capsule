@@ -126,7 +126,11 @@ class VoiceCapsule {
   // Returns a list of voice capsule IDs available for the given user to download
   static Future<List<VoiceCapsule>> checkForCapsules(String userID) async {
     List<VoiceCapsule> pendingCapsules = <VoiceCapsule>[];
-    var queryResult = await firebaseInstance.collection("users").doc(firebaseUser!.uid).collection("capsules").doc("pending_capsules").get();
+    var queryResult = await firebaseInstance
+        .collection("users")
+        .doc(firebaseUser!.uid)
+        .collection("capsules")
+        .doc("pending_capsules").get();
     final Map<String, dynamic> map = queryResult.data()!;
     print("Capsules pending in database: ${map.length}");
     // For each capsules in the map, check if its open date has been surpassed

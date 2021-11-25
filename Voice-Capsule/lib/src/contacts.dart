@@ -2,13 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:voice_capsule/src/widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:collection';
 import 'authentication.dart';
+import 'utils.dart';
 
 /*
  * Contacts page
  */
 
-//User? firebaseUser; // for obtaining uid
+// Mapping of friends' names to friends' UIDs
+LinkedHashMap<String, String> currentUserContacts = LinkedHashMap<String, String>();
+// Mapping of friends' names to friends' emails
+Map<String, dynamic> friends = <String, dynamic>{};
 
 // Friends list
 class ContactsSlide extends StatefulWidget {
@@ -16,21 +21,52 @@ class ContactsSlide extends StatefulWidget {
 
   @override
   _ContactsSlideState createState() => _ContactsSlideState();
+  // Fetch contacts for given userID from database
+
+  // Populate both friends maps
+  static Future<void> populateUserContacts({bool newUser = false}) async {
+    currentUserContacts.clear();
+    currentUserContacts["Myself"] = firebaseUser!.uid;
+    // Get user's contacts from firestore database
+    var thisUserDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(firebaseUser!.uid).get();
+    friends = thisUserDoc.data()!['contacts'];
+    // If new user, don't parse empty friends list
+    if(newUser) {
+      return;
+    }
+    var allUsersDoc = await FirebaseFirestore.instance
+        .collection('add_friends')
+        .doc('all_users').get();
+    for(String friendEmail in friends.keys) {
+      String? friendName = friends[friendEmail];
+      if(friendName == null) {
+        continue;
+      }
+      Map<String, dynamic> friendInfoMap = allUsersDoc.data()![friendEmail];
+      String? friendUID = friendInfoMap[friendName];
+      if(friendUID == null) {
+        continue;
+      }
+      currentUserContacts[friendName] = friendUID;
+    }
+  }
 }
 
 class _ContactsSlideState extends State<ContactsSlide>{
-  Map<String, dynamic> friends = <String, dynamic>{}; // list of contacts
 
   // constructor
   @override
   void initState() {
-    buildFriendsList(); // populate list of contacts
+    ContactsSlide.populateUserContacts(); // populate list of contacts
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children : [
           Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -44,7 +80,7 @@ class _ContactsSlideState extends State<ContactsSlide>{
                             builder: (context) => const AddFriendsScreen()
                         )
                     );
-                    },
+                  },
                 ),
                 const SizedBox(width: 16),
                 StyledButton(
@@ -61,7 +97,7 @@ class _ContactsSlideState extends State<ContactsSlide>{
                               friendRequests:thisUser['requests'], // pass this user's pending requests
                           ),
                         )
-                    );
+                      );
                     },
                 ),
               ]
@@ -82,7 +118,8 @@ class _ContactsSlideState extends State<ContactsSlide>{
           ),
           RaisedButton(
             onPressed: () async {
-              await buildFriendsList().then((value) {
+              await ContactsSlide.populateUserContacts().then((value) async {
+                // Refresh send page contacts list
               });
             },
             color: Colors.grey[300],
@@ -94,15 +131,6 @@ class _ContactsSlideState extends State<ContactsSlide>{
           ),
         ]
     );
-  }
-
-  // Populate the friend list
-  Future<void> buildFriendsList() async {
-    var thisUser = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(firebaseUser!.uid).get(); // get this user's document
-    friends = thisUser['contacts']; // get this user's friend's list
-    setState((){}); // refresh
   }
 }
 
@@ -227,6 +255,7 @@ class _FriendFormState extends State<FriendForm> {
                             .doc(otherUserUid[0]).update({
                           'requests': requestMap
                         }); // push to database
+                        showToast_quick(context, "Friend request sent!");
                         Navigator.of(context).pop(); // return to original screen
                       }
                     }
@@ -401,6 +430,7 @@ class _FriendRequestState extends State<FriendRequestScreen> {
                                       }); // now push change
                                       //
                                       // // TODO make sure when you go back, friends list is already refreshed
+                                      showToast_quick(context, "Friend request accepted");
                                       setState((){}); // refresh
                                     },
                                     icon: Icon(Icons.check)),
@@ -412,6 +442,7 @@ class _FriendRequestState extends State<FriendRequestScreen> {
                                           .doc(firebaseUser!.uid).update({
                                         'requests' : widget.friendRequests
                                       }); // now push change
+                                      showToast_quick(context, "Friend request deleted");
                                       setState((){}); // refresh
                                     },
                                     icon: Icon(Icons.cancel)),

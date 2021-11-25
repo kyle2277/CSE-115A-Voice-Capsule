@@ -21,8 +21,6 @@ import 'authentication.dart';
 class SimpleRecorder extends StatefulWidget {
   SimpleRecorder({
     required this.contacts,
-    // will we need to pass in the firebase instance to pass into send screen
-    // through this argument?
   });
   // User contacts
   LinkedHashMap<String, String> contacts;

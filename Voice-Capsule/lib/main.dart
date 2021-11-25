@@ -14,11 +14,7 @@ import 'src/contacts.dart';
 import 'src/playback.dart';
 import 'src/widgets.dart';
 import 'src/profile.dart';
-import 'dart:collection';
 import 'src/utils.dart';
-
-// Current user's contacts
-LinkedHashMap<String, String> currentUserContacts = LinkedHashMap<String, String>();
 
 // Login functions
 class ApplicationState extends ChangeNotifier {
@@ -68,15 +64,6 @@ class ApplicationState extends ChangeNotifier {
     }
   }
 
-  // Fetch contacts for given userID from database
-  void populateUserContacts(String userID) {
-    currentUserContacts.clear();
-    currentUserContacts["Myself"] = firebaseUser!.uid;
-    currentUserContacts["Robert"] = "1";
-    currentUserContacts["Thomas"] = "2";
-    currentUserContacts["Vivianne"] = "3";
-  }
-
   // Sets user reference, name, and email globals in authentication.dart
   Future setUserInformation(void Function(FirebaseAuthException e) errorCallback) async {
     firebaseUser = FirebaseAuth.instance.currentUser;
@@ -107,7 +94,7 @@ class ApplicationState extends ChangeNotifier {
         setUserInformation(userInfoErrorCallback);
         firebaseUser = FirebaseAuth.instance.currentUser;
         // Todo: fetch user contacts from database and populate contacts map with <User name, UserID> key-values
-        populateUserContacts(firebaseUser!.uid);
+        ContactsSlide.populateUserContacts();
       });
       // Hack so that LoginCard is in loggedOut state next time signOut() is called
       _loginState = ApplicationLoginState.loggedOut;
@@ -142,7 +129,7 @@ class ApplicationState extends ChangeNotifier {
         firebaseUser = FirebaseAuth.instance.currentUser;
         myName = displayName;
         myEmail = email;
-        populateUserContacts(firebaseUser!.uid);
+        ContactsSlide.populateUserContacts(newUser: true);
 
         // Create entries in Cloud Firestore for a fresh entry
         CollectionReference all_users = FirebaseFirestore.instance.collection('users');
