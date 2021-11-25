@@ -60,6 +60,7 @@ class _ContactsSlideState extends State<ContactsSlide>{
   @override
   void initState() {
     ContactsSlide.populateUserContacts(); // populate list of contacts
+    friendRequestAlert();
     super.initState();
   }
 
@@ -119,7 +120,9 @@ class _ContactsSlideState extends State<ContactsSlide>{
           RaisedButton(
             onPressed: () async {
               await ContactsSlide.populateUserContacts().then((value) async {
-                // Refresh send page contacts list
+                setState(() {
+                  friendRequestAlert();
+                });// Refresh send page contacts list
               });
             },
             color: Colors.grey[300],
@@ -131,6 +134,15 @@ class _ContactsSlideState extends State<ContactsSlide>{
           ),
         ]
     );
+  }
+
+  void friendRequestAlert() async {
+    var thisUser = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(firebaseUser!.uid).get(); // get this user's document
+    if(thisUser['requests'].length > 0){
+      showToast_quick(context, "You have pending friend requests!");
+    }
   }
 }
 
