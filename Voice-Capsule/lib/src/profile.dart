@@ -11,16 +11,17 @@ class ProfileSlide extends StatelessWidget{
   Widget build(BuildContext context){
     return Scaffold(
       body: Container(
-        padding: EdgeInsets.only(left: 16, top:25, right: 16),
+        padding: const EdgeInsets.only(left: 16, top:25, right: 16),
         child: ListView(
           children: [
-            Text(
+            const Text(
               "Profile",
-              style: TextStyle(fontSize:25, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.w500),
             ),
-            SizedBox(
+            const SizedBox(
               height:15,
-
             ),
             Center(
               child: Stack(
@@ -60,12 +61,12 @@ class ProfileSlide extends StatelessWidget{
                         ),
                         color: Colors.green,
                     ),
-                    child: Icon(Icons.edit, color: Colors.white,)
+                    child: const Icon(Icons.edit, color: Colors.white,)
                   ))
                 ],
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height:35,
             ),
             buildTextField("Full Name", firebaseUser!.displayName ?? ""),
@@ -97,15 +98,16 @@ class ProfileSlide extends StatelessWidget{
           labelText: labelText,
           floatingLabelBehavior: FloatingLabelBehavior.always,
           hintText: placeholder,
-          hintStyle: TextStyle(
+          hintStyle: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
             color: Colors.black,
-          )),
-    ),
+          )
+        ),
+      ),
     );
-    }
   }
+}
 
 
 
