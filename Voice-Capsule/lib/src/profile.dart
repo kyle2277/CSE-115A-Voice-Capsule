@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:voice_capsule/src/authentication.dart';
 import '../main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -67,8 +68,8 @@ class ProfileSlide extends StatelessWidget{
             SizedBox(
               height:35,
             ),
-            buildTextField("Full Name", "Marianna Marcelline"),
-            buildTextField("Email", "marianna.marcelline@gmail.com"),
+            buildTextField("Full Name", firebaseUser!.displayName ?? ""),
+            buildTextField("Email", firebaseUser!.email ?? ""),
 
             //Logout Button
             TextButton(
@@ -90,6 +91,7 @@ class ProfileSlide extends StatelessWidget{
     return Padding(
       padding: const EdgeInsets.only(bottom: 35.0),
       child: TextField(
+        enabled: false,
         decoration: InputDecoration(
           contentPadding: EdgeInsets.only(bottom: 3),
           labelText: labelText,
