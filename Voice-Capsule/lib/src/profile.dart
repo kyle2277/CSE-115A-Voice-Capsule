@@ -69,8 +69,8 @@ class ProfileSlide extends StatelessWidget{
             const SizedBox(
               height:35,
             ),
-            buildTextField("Full Name", firebaseUser!.displayName ?? ""),
-            buildTextField("Email", firebaseUser!.email ?? ""),
+            buildTextField("Full Name", myName ?? ""),
+            buildTextField("Email", myEmail ?? ""),
 
             //Logout Button
             TextButton(
