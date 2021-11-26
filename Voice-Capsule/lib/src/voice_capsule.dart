@@ -58,7 +58,6 @@ class VoiceCapsule {
     File file = File(filePath);
 
     // Upload to the receiver's folder for fetching by the receiver
-    // TODO: File naming not consistent with sendToDatabase() "<who receives capsule>/outgoing_<who sends capsule>_<creation_time>.mp4"
     fireStorage.UploadTask uploadTask = firebaseStorageInstance.ref()
         .child(firebaseStoragePath)
         .putFile(file);
