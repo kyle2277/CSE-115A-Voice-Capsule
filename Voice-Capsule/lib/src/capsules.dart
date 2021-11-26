@@ -205,11 +205,11 @@ class _CapsulesSlideState extends State<CapsulesSlide> with SingleTickerProvider
                           await capsules[index].deleteFromDatabase();
                         });
                       }
+                      // print(capsule.firebaseStoragePath.runtimeType);
                       Navigator.push(
                         context,
                         // Send audio file to player using capsules[index]
-                        MaterialPageRoute(builder: (context) => const PlaybackScreen()),
-                      );
+                        MaterialPageRoute(builder: (context) => PlaybackScreen(capsule.localFileName)));
                     }
                 ),
               );
@@ -234,9 +234,16 @@ class _CapsulesSlideState extends State<CapsulesSlide> with SingleTickerProvider
 }
 
 // Page to send recording and other options
-class PlaybackScreen extends StatelessWidget {
-  const PlaybackScreen({Key? key}) : super(key: key);
+class PlaybackScreen extends StatefulWidget {
+  PlaybackScreen (this.localFileName);
 
+  final String localFileName;
+
+  @override
+  State<PlaybackScreen> createState() => _PlaybackScreenState();
+}
+
+class _PlaybackScreenState extends State<PlaybackScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -250,7 +257,7 @@ class PlaybackScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SimplePlayback(audioFileUrl: 'recorded_file.mp4', autoStart: true),
+            SimplePlayback(audioFileUrl: '$CAPSULES_DIRECTORY/${firebaseUser!.uid}/${widget.localFileName}', autoStart: true),
           ],
         ),
       ),
