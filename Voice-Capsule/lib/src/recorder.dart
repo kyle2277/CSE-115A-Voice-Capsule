@@ -284,6 +284,10 @@ class _SenderScreenState extends State<SenderScreen> {
             Padding(
               padding: const EdgeInsets.only(left: 65.0, right: 65.0, bottom: 10.0),
               child: DateTimeField(
+                resetIcon: Icon(
+                  Icons.clear,
+                  color: Theme.of(context).primaryColor,
+                ),
                 decoration: InputDecoration(
                     icon: Icon(
                       Icons.calendar_today,
@@ -296,7 +300,6 @@ class _SenderScreenState extends State<SenderScreen> {
                     ),
                 ),
                 format: DATE_TIME_FORMAT,
-                // how to clear selection when x is pressed?
                 onShowPicker: (context, currentValue) async {
                   final date = await showDatePicker(
                       context: context,
@@ -304,7 +307,6 @@ class _SenderScreenState extends State<SenderScreen> {
                       initialDate: currentValue ?? DateTime.now(),
                       lastDate: DateTime(2100),
                       builder: (context, child) {
-                        // Todo: refactor theme into a separate file for easy refs
                         return Theme(
                           data: ThemeData.dark().copyWith(
                             colorScheme: ColorScheme.dark(
