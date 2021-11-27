@@ -186,6 +186,7 @@ class _CapsulesSlideState extends State<CapsulesSlide> with SingleTickerProvider
                           ),
                         ]
                     ),
+                    // Todo: change colors for the capsules
                     title:Text(
                       getCapsuleTitle(capsules[index]),
                       textScaleFactor: 0.9,
@@ -243,7 +244,7 @@ class PlaybackScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Play Recording"),
         centerTitle: true,
-        backgroundColor: Colors.purple,
+        backgroundColor: Theme.of(context).primaryColor,
       ),
       body: Center(
         child: Column (

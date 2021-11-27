@@ -228,6 +228,7 @@ class App extends StatelessWidget {
                   highlightColor: Colors.deepPurple,
                 ),
                 primarySwatch: Colors.deepPurple,
+                dialogBackgroundColor: Colors.grey[900],
                 iconTheme: Theme.of(context).iconTheme.copyWith(
                   color: Colors.deepPurple,
                 ),

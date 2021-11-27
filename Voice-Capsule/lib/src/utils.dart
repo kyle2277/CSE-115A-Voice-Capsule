@@ -62,7 +62,7 @@ Future<void> showAlertDialog_OK(BuildContext context, String title, String messa
         ),
         actions: <Widget>[
           TextButton(
-            child: const Text('OK'),
+            child: Text('OK'),
             onPressed: () {
               Navigator.of(context).pop();
             },
