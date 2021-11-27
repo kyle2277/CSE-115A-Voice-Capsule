@@ -228,11 +228,11 @@ class App extends StatelessWidget {
                   highlightColor: Colors.deepPurple,
                 ),
                 primarySwatch: Colors.deepPurple,
-                dialogBackgroundColor: Colors.grey[900],
+                dialogBackgroundColor: Colors.grey[850],
                 iconTheme: Theme.of(context).iconTheme.copyWith(
                   color: Colors.deepPurple,
                 ),
-                scaffoldBackgroundColor: Colors.black12,
+                scaffoldBackgroundColor: Colors.grey[900],
                 textTheme: GoogleFonts.robotoTextTheme(
                   Theme.of(context).textTheme.apply(
                     bodyColor: Colors.white,
@@ -337,7 +337,8 @@ class _HomeCardState extends State<HomeCard>{
             label: 'Profile',
           ),
         ],
-        backgroundColor: Colors.grey[200],
+        backgroundColor: Theme.of(context).dialogBackgroundColor,
+        unselectedItemColor: Colors.grey,
         selectedItemColor: Theme.of(context).primaryColor,
       ),
     );

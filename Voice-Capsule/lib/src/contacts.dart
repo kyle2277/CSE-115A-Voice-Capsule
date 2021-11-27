@@ -122,9 +122,14 @@ class _ContactsSlideState extends State<ContactsSlide>{
                 // Refresh send page contacts list
               });
             },
-            color: Colors.grey[300],
+            color: Theme.of(context).dialogBackgroundColor,
             highlightColor: Colors.grey[300],
-            child: const Text("Refresh"),
+            child: const Text(
+                "Refresh",
+              style: TextStyle(
+                color: Colors.grey,
+              ),
+            ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(5),
             ),

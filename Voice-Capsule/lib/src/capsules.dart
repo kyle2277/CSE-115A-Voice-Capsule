@@ -149,12 +149,13 @@ class _CapsulesSlideState extends State<CapsulesSlide> with SingleTickerProvider
             itemBuilder: (context, index) {
               return Card(
                 child: ListTile(
-                    tileColor: capsules[index].opened ? Colors.white : getNewCapsuleColor(newCapsuleAnimation.value),
+                    tileColor: capsules[index].opened ? Theme.of(context).dialogBackgroundColor : getNewCapsuleColor(newCapsuleAnimation.value),
                     trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
                             icon: Icon(Icons.save_alt),
+                            color: Colors.grey,
                             iconSize: 22,
                             onPressed: (() async {
                               VoiceCapsule selected = capsules[index];
@@ -169,6 +170,7 @@ class _CapsulesSlideState extends State<CapsulesSlide> with SingleTickerProvider
                           ),
                           IconButton(
                             icon: Icon(Icons.delete),
+                            color: Colors.grey,
                             iconSize: 22,
                             onPressed: () async {
                               VoiceCapsule selected = capsules[index];
@@ -222,9 +224,14 @@ class _CapsulesSlideState extends State<CapsulesSlide> with SingleTickerProvider
             await checkForNewCapsules(context).then((value) {
             });
           },
-          color: Colors.grey[300],
+          color: Theme.of(context).dialogBackgroundColor,
           highlightColor: Colors.grey[300],
-          child: Text("Refresh"),
+          child: Text(
+              "Refresh",
+            style: TextStyle(
+              color: Colors.grey,
+            ),
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(5),
           ),
