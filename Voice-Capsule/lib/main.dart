@@ -15,6 +15,7 @@ import 'src/playback.dart';
 import 'src/widgets.dart';
 import 'src/profile.dart';
 import 'src/utils.dart';
+import 'src/themes.dart';
 
 // Login functions
 class ApplicationState extends ChangeNotifier {
@@ -208,42 +209,8 @@ class App extends StatelessWidget {
         builder: (_, ThemeMode currentMode, __) {
           return MaterialApp(
             title: 'Voice Capsule Login',
-
-              // Light theme will use purple as the main color
-              theme: ThemeData(
-                buttonTheme: Theme.of(context).buttonTheme.copyWith(
-                  highlightColor: Colors.purple,
-                ),
-                primarySwatch: Colors.purple,
-                textTheme: GoogleFonts.robotoTextTheme(
-                  Theme.of(context).textTheme,
-                ),
-                visualDensity: VisualDensity.adaptivePlatformDensity,
-              ),
-
-              // Dark theme will use darkPurple as the main color
-              darkTheme: ThemeData(
-                hintColor: Colors.white,
-                buttonTheme: Theme.of(context).buttonTheme.copyWith(
-                  highlightColor: Colors.deepPurple,
-                ),
-                primarySwatch: Colors.deepPurple,
-                dialogBackgroundColor: Colors.grey[850],
-                iconTheme: Theme.of(context).iconTheme.copyWith(
-                  color: Colors.deepPurple,
-                ),
-                scaffoldBackgroundColor: Colors.grey[900],
-                textTheme: GoogleFonts.robotoTextTheme(
-                  Theme.of(context).textTheme.apply(
-                    bodyColor: Colors.white,
-                    displayColor: Colors.white,
-                    decorationColor: Colors.white,
-                  ),
-                ),
-                visualDensity: VisualDensity.adaptivePlatformDensity,
-
-
-              ),
+              theme: voCapLight(context),
+              darkTheme: voCapDark(context),
               home: const LoginCard(),
           );
         }
