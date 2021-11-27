@@ -209,9 +209,10 @@ class App extends StatelessWidget {
         builder: (_, ThemeMode currentMode, __) {
           return MaterialApp(
             title: 'Voice Capsule Login',
-              theme: voCapLight(context),
-              darkTheme: voCapDark(context),
-              home: const LoginCard(),
+            theme: voCapLight(context),
+            darkTheme: voCapDark(context),
+            home: const LoginCard(),
+            debugShowCheckedModeBanner: false,
           );
         }
     );
@@ -327,7 +328,7 @@ class RecordWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Column (
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
