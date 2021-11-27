@@ -53,11 +53,10 @@ class StyledButton extends StatelessWidget {
   final Widget child;
   final void Function() onPressed;
 
-  // Todo: unify the colors across the app
   @override
   Widget build(BuildContext context) => OutlinedButton(
     style: OutlinedButton.styleFrom(
-        side: const BorderSide(color: Colors.purple)),
+        side: BorderSide(color: Theme.of(context).primaryColor)),
     onPressed: onPressed,
     child: child,
   );
