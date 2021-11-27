@@ -110,8 +110,19 @@ class _ContactsSlideState extends State<ContactsSlide>{
                     String email = friends.keys.elementAt(index); // get a specific friend's info
                     return Card(
                         child: ListTile(
-                          title : Text(friends[email]), // friend name
-                          subtitle : Text(email), // friend email
+                          tileColor: Theme.of(context).dialogBackgroundColor,
+                          title : Text(
+                              friends[email],
+                            style: TextStyle(
+                              color: Theme.of(context).hintColor,
+                            ),
+                          ), // friend name
+                          subtitle : Text(
+                              email,
+                            style: TextStyle(
+                              color: Theme.of(context).hintColor
+                            ),
+                          ), // friend email
                         )
                     );
                   }
@@ -398,7 +409,13 @@ class _FriendRequestState extends State<FriendRequestScreen> {
                       String email = widget.friendRequests.keys.elementAt(index); // other user's email
                       return Card(
                           child: ListTile(
-                            title : Text(widget.friendRequests[email]), // other user's username
+                            tileColor: Theme.of(context).dialogBackgroundColor,
+                            title : Text(
+                                widget.friendRequests[email],
+                              style: TextStyle(
+                                color: Theme.of(context).hintColor,
+                              ),
+                            ), // other user's username
                             subtitle : Text(email), // email
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -452,7 +469,11 @@ class _FriendRequestState extends State<FriendRequestScreen> {
                                       showToast_quick(context, "Friend request accepted");
                                       setState((){}); // refresh
                                     },
-                                    icon: Icon(Icons.check)),
+                                    icon: const Icon(
+                                      Icons.check,
+                                      color: Colors.grey,
+                                    )
+                                ),
                                 IconButton( // reject request
                                     onPressed: () async {
                                       widget.friendRequests.remove(email); // remove user from request list locally
@@ -464,7 +485,11 @@ class _FriendRequestState extends State<FriendRequestScreen> {
                                       showToast_quick(context, "Friend request deleted");
                                       setState((){}); // refresh
                                     },
-                                    icon: Icon(Icons.cancel)),
+                                    icon: const Icon(
+                                      Icons.cancel,
+                                      color: Colors.grey,
+                                    ),
+                                ),
                               ],
                             ),
                           )

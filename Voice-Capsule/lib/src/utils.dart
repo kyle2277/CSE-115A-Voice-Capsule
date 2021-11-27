@@ -23,7 +23,7 @@ void showToast_OK(BuildContext context, String message, {int duration = 5}) {
       action: SnackBarAction(
           label: 'OK',
           onPressed: scaffold.hideCurrentSnackBar,
-          textColor: Colors.purpleAccent
+          textColor: Theme.of(context).primaryColor,
       ),
     ),
   );

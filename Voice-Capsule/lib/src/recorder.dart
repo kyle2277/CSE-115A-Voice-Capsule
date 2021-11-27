@@ -284,9 +284,13 @@ class _SenderScreenState extends State<SenderScreen> {
             Padding(
               padding: const EdgeInsets.only(left: 65.0, right: 65.0, bottom: 10.0),
               child: DateTimeField(
+                resetIcon: Icon(
+                  Icons.clear,
+                  color: Theme.of(context).primaryColor,
+                ),
                 decoration: InputDecoration(
                     icon: Icon(
-                        Icons.calendar_today,
+                      Icons.calendar_today,
                       color: Theme.of(context).primaryColor,
                     ),
                     labelText: 'Click to select open date',
@@ -296,18 +300,47 @@ class _SenderScreenState extends State<SenderScreen> {
                     ),
                 ),
                 format: DATE_TIME_FORMAT,
-                // how to clear selection when x is pressed?
                 onShowPicker: (context, currentValue) async {
                   final date = await showDatePicker(
                       context: context,
                       firstDate: DateTime(1900),
                       initialDate: currentValue ?? DateTime.now(),
-                      lastDate: DateTime(2100));
+                      lastDate: DateTime(2100),
+                      builder: (context, child) {
+                        return Theme(
+                          data: ThemeData.dark().copyWith(
+                            colorScheme: ColorScheme.dark(
+                              primary: Theme.of(context).primaryColor,
+                              onPrimary: Theme.of(context).hintColor,
+                              surface: Theme.of(context).primaryColor,
+                              onSurface: Theme.of(context).hintColor,
+                            ),
+                            dialogBackgroundColor : Theme.of(context).dialogBackgroundColor,
+                          ),
+                          child: child!,
+                        );
+                      },
+                  );
                   if (date != null) {
                     final time = await showTimePicker(
                       context: context,
                       initialTime:
                       TimeOfDay.fromDateTime(currentValue ?? DateTime.now()),
+                      builder: (context, child) {
+                        // Todo: refactor theme into a separate file for easy refs
+                        return Theme(
+                          data: ThemeData.dark().copyWith(
+                            colorScheme: ColorScheme.dark(
+                              primary: Theme.of(context).primaryColor,
+                              onPrimary: Theme.of(context).hintColor,
+                              surface: Theme.of(context).dialogBackgroundColor,
+                              onSurface: Theme.of(context).hintColor,
+                            ),
+                            dialogBackgroundColor : Theme.of(context).dialogBackgroundColor,
+                          ),
+                          child: child!,
+                        );
+                      },
                     );
                     DateTime fieldValue = DateTimeField.combine(date, time);
                     setState(() {
@@ -341,6 +374,7 @@ class _SenderScreenState extends State<SenderScreen> {
                   icon: const Icon(Icons.arrow_downward),
                   iconSize: 24,
                   elevation: 16,
+                  dropdownColor: Theme.of(context).dialogBackgroundColor,
                   style: TextStyle(
                       color: Theme.of(context).primaryColor,
                   ),
