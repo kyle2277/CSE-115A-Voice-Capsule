@@ -148,6 +148,10 @@ class _CapsulesSlideState extends State<CapsulesSlide> with SingleTickerProvider
             itemCount: capsules.length,
             itemBuilder: (context, index) {
               return Card(
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(color: Colors.grey, width: 0.25),
+                  borderRadius: BorderRadius.circular(5),
+                ),
                 child: ListTile(
                     tileColor: capsules[index].opened ? Theme.of(context).dialogBackgroundColor : getNewCapsuleColor(newCapsuleAnimation.value, context),
                     trailing: Row(

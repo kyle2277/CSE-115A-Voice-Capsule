@@ -195,6 +195,7 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
           splashRadius: 60,
           iconSize: 80.0,
           color: Colors.red[500],
+          enableFeedback: false,
           icon: recorder!.isStopped ? Icon(Icons.circle_rounded) : Icon(Icons.stop_circle_outlined),
           tooltip: recorder!.isRecording ? 'Tap to stop recording' : 'Tap to start recording',
           onPressed: () {
@@ -398,7 +399,7 @@ class _SenderScreenState extends State<SenderScreen> {
 
                   // Send the voice capsule to the database
                   voCap.sendToDatabase();
-                  showToast_quick(context, "Voice Capsule sent!", duration: 4);
+                  showToast_quick(context, "Voice Capsule sent!", duration: 3);
                   Navigator.pop(context);
                 }
               },
