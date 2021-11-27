@@ -125,9 +125,14 @@ class _ContactsSlideState extends State<ContactsSlide>{
                 });// Refresh send page contacts list
               });
             },
-            color: Colors.grey[300],
+            color: Theme.of(context).dialogBackgroundColor,
             highlightColor: Colors.grey[300],
-            child: const Text("Refresh"),
+            child: const Text(
+                "Refresh",
+              style: TextStyle(
+                color: Colors.grey,
+              ),
+            ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(5),
             ),
@@ -161,7 +166,7 @@ class _AddFriendsState extends State<AddFriendsScreen> {
         appBar: AppBar(
           title: const Text('Add Friends'),
           centerTitle: true,
-          backgroundColor: Colors.purple,
+          backgroundColor: Theme.of(context).primaryColor,
         ),
         body: Center(
           child: Column (
@@ -378,7 +383,7 @@ class _FriendRequestState extends State<FriendRequestScreen> {
       appBar: AppBar(
         title: const Text("Friend Requests"),
         centerTitle: true,
-        backgroundColor: Colors.purple,
+        backgroundColor: Theme.of(context).primaryColor,
       ),
       body: Center(
         child: Column (
@@ -387,7 +392,7 @@ class _FriendRequestState extends State<FriendRequestScreen> {
           children: [
             Expanded( // list of pending requests
                 child:
-                widget.friendRequests.length==0 ? Header('No Friend Requests') : ListView.builder(
+                widget.friendRequests.length == 0 ? Header('No Friend Requests') : ListView.builder(
                     itemCount: widget.friendRequests.length,
                     itemBuilder: (context, index) {
                       String email = widget.friendRequests.keys.elementAt(index); // other user's email

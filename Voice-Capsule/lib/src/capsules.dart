@@ -132,8 +132,8 @@ class _CapsulesSlideState extends State<CapsulesSlide> with SingleTickerProvider
   }
 
   // Color generator for new capsule glow animation
-  Color getNewCapsuleColor(double lightness) {
-    HSLColor col = HSLColor.fromColor(Colors.purple);
+  Color getNewCapsuleColor(double lightness, BuildContext context) {
+    HSLColor col = HSLColor.fromColor(Theme.of(context).primaryColor);
     col = col.withLightness(lightness);
     return col.toColor();
   }
@@ -149,12 +149,13 @@ class _CapsulesSlideState extends State<CapsulesSlide> with SingleTickerProvider
             itemBuilder: (context, index) {
               return Card(
                 child: ListTile(
-                    tileColor: capsules[index].opened ? Colors.white : getNewCapsuleColor(newCapsuleAnimation.value),
+                    tileColor: capsules[index].opened ? Theme.of(context).dialogBackgroundColor : getNewCapsuleColor(newCapsuleAnimation.value, context),
                     trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
                             icon: Icon(Icons.save_alt),
+                            color: Colors.grey,
                             iconSize: 22,
                             onPressed: (() async {
                               VoiceCapsule selected = capsules[index];
@@ -169,6 +170,7 @@ class _CapsulesSlideState extends State<CapsulesSlide> with SingleTickerProvider
                           ),
                           IconButton(
                             icon: Icon(Icons.delete),
+                            color: Colors.grey,
                             iconSize: 22,
                             onPressed: () async {
                               VoiceCapsule selected = capsules[index];
@@ -186,9 +188,13 @@ class _CapsulesSlideState extends State<CapsulesSlide> with SingleTickerProvider
                           ),
                         ]
                     ),
-                    title:Text(
+                    // Todo: change colors for the capsules
+                    title: Text(
                       getCapsuleTitle(capsules[index]),
                       textScaleFactor: 0.9,
+                      style: TextStyle(
+                        color: Colors.grey,
+                      ),
                     ),
                     subtitle: Text(
                       capsules[index].toString(),
@@ -221,9 +227,14 @@ class _CapsulesSlideState extends State<CapsulesSlide> with SingleTickerProvider
             await checkForNewCapsules(context).then((value) {
             });
           },
-          color: Colors.grey[300],
+          color: Theme.of(context).dialogBackgroundColor,
           highlightColor: Colors.grey[300],
-          child: Text("Refresh"),
+          child: Text(
+              "Refresh",
+            style: TextStyle(
+              color: Colors.grey,
+            ),
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(5),
           ),
@@ -250,7 +261,7 @@ class _PlaybackScreenState extends State<PlaybackScreen> {
       appBar: AppBar(
         title: const Text("Play Recording"),
         centerTitle: true,
-        backgroundColor: Colors.purple,
+        backgroundColor: Theme.of(context).primaryColor,
       ),
       body: Center(
         child: Column (

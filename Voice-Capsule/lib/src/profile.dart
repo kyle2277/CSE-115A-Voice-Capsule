@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:voice_capsule/src/authentication.dart';
 import '../main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -10,16 +11,17 @@ class ProfileSlide extends StatelessWidget{
   Widget build(BuildContext context){
     return Scaffold(
       body: Container(
-        padding: EdgeInsets.only(left: 16, top:25, right: 16),
+        padding: const EdgeInsets.only(left: 16, top:25, right: 16),
         child: ListView(
           children: [
-            Text(
+            const Text(
               "Profile",
-              style: TextStyle(fontSize:25, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.w500),
             ),
-            SizedBox(
+            const SizedBox(
               height:15,
-
             ),
             Center(
               child: Stack(
@@ -59,16 +61,20 @@ class ProfileSlide extends StatelessWidget{
                         ),
                         color: Colors.green,
                     ),
-                    child: Icon(Icons.edit, color: Colors.white,)
+                    child: const Icon(Icons.edit, color: Colors.white,)
                   ))
                 ],
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height:35,
             ),
-            buildTextField("Full Name", "Marianna Marcelline"),
-            buildTextField("Email", "marianna.marcelline@gmail.com"),
+            BuildTextField(
+                labelText: "Full Name",
+                placeHolder: myName ?? ""),
+            BuildTextField(
+                labelText: "Email",
+                placeHolder: myEmail ?? ""),
 
             //Logout Button
             TextButton(
@@ -85,28 +91,34 @@ class ProfileSlide extends StatelessWidget{
       ),
     );
   }
+}
 
-  Widget buildTextField(String labelText, String placeholder) {
+class BuildTextField extends StatelessWidget{
+  BuildTextField({Key? key, required this.labelText, required this.placeHolder}) : super(key: key);
+  String labelText;
+  String placeHolder;
+
+  @override
+  Widget build(BuildContext context){
     return Padding(
       padding: const EdgeInsets.only(bottom: 35.0),
       child: TextField(
+        enabled: false,
         decoration: InputDecoration(
-          contentPadding: EdgeInsets.only(bottom: 3),
-          labelText: labelText,
-          floatingLabelBehavior: FloatingLabelBehavior.always,
-          hintText: placeholder,
-          hintStyle: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          )),
-    ),
+            contentPadding: const EdgeInsets.only(bottom: 3),
+            labelText: this.labelText,
+            labelStyle: TextStyle(
+              color: Theme.of(context).primaryColor,
+            ),
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+            hintText: this.placeHolder,
+            hintStyle: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+                color: Theme.of(context).hintColor
+            )
+        ),
+      ),
     );
-    }
   }
-
-
-
-
-
-
+}

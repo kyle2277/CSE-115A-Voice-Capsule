@@ -229,8 +229,16 @@ class _EmailFormState extends State<EmailForm> {
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: TextFormField(
                     controller: _controller,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: 'Enter your email',
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _controller.clear();
+                          });
+                        },
+                        icon: const Icon(Icons.clear),
+                      ),
                     ),
                     validator: (value) {
                       if (value!.isEmpty) {
@@ -315,8 +323,16 @@ class _RegisterFormState extends State<RegisterForm> {
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: TextFormField(
                     controller: _emailController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: 'Enter your email',
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _emailController.clear();
+                          });
+                        },
+                        icon: const Icon(Icons.clear),
+                      ),
                     ),
                     validator: (value) {
                       if (value!.isEmpty) {
@@ -330,8 +346,16 @@ class _RegisterFormState extends State<RegisterForm> {
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: TextFormField(
                     controller: _displayNameController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: 'First & last name',
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _displayNameController.clear();
+                          });
+                        },
+                        icon: const Icon(Icons.clear),
+                      ),
                     ),
                     validator: (value) {
                       if (value!.isEmpty) {
@@ -345,8 +369,16 @@ class _RegisterFormState extends State<RegisterForm> {
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: TextFormField(
                     controller: _passwordController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: 'Password',
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _passwordController.clear();
+                          });
+                        },
+                        icon: const Icon(Icons.clear),
+                      ),
                     ),
                     obscureText: true,
                     validator: (value) {
@@ -456,8 +488,16 @@ class _PasswordFormState extends State<PasswordForm> {
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: TextFormField(
                     controller: _passwordController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: 'Password',
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _passwordController.clear();
+                          });
+                        },
+                        icon: const Icon(Icons.clear),
+                      ),
                     ),
                     obscureText: true,
                     validator: (value) {

@@ -199,22 +199,54 @@ void main() {
 
 // App opens on LoginCard
 class App extends StatelessWidget {
+  static final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Voice Capsule Login',
-      theme: ThemeData(
-        buttonTheme: Theme.of(context).buttonTheme.copyWith(
-          highlightColor: Colors.deepPurple,
-        ),
-        primarySwatch: Colors.deepPurple,
-        textTheme: GoogleFonts.robotoTextTheme(
-          Theme.of(context).textTheme,
-        ),
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: const LoginCard(),
+    return ValueListenableBuilder<ThemeMode>(
+        valueListenable: themeNotifier,
+        builder: (_, ThemeMode currentMode, __) {
+          return MaterialApp(
+            title: 'Voice Capsule Login',
 
+              // Light theme will use purple as the main color
+              theme: ThemeData(
+                buttonTheme: Theme.of(context).buttonTheme.copyWith(
+                  highlightColor: Colors.purple,
+                ),
+                primarySwatch: Colors.purple,
+                textTheme: GoogleFonts.robotoTextTheme(
+                  Theme.of(context).textTheme,
+                ),
+                visualDensity: VisualDensity.adaptivePlatformDensity,
+              ),
+
+              // Dark theme will use darkPurple as the main color
+              darkTheme: ThemeData(
+                hintColor: Colors.white,
+                buttonTheme: Theme.of(context).buttonTheme.copyWith(
+                  highlightColor: Colors.deepPurple,
+                ),
+                primarySwatch: Colors.deepPurple,
+                dialogBackgroundColor: Colors.grey[850],
+                iconTheme: Theme.of(context).iconTheme.copyWith(
+                  color: Colors.deepPurple,
+                ),
+                scaffoldBackgroundColor: Colors.grey[900],
+                textTheme: GoogleFonts.robotoTextTheme(
+                  Theme.of(context).textTheme.apply(
+                    bodyColor: Colors.white,
+                    displayColor: Colors.white,
+                    decorationColor: Colors.white,
+                  ),
+                ),
+                visualDensity: VisualDensity.adaptivePlatformDensity,
+
+
+              ),
+              home: const LoginCard(),
+          );
+        }
     );
   }
 }
@@ -229,7 +261,7 @@ class LoginCard extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Login to Voice Capsule'),
         centerTitle: true,
-        backgroundColor: Colors.purple,
+        backgroundColor: Theme.of(context).primaryColor,
       ),
       body: Center(
         child: Consumer<ApplicationState>(
@@ -280,7 +312,7 @@ class _HomeCardState extends State<HomeCard>{
           //textScaleFactor: 0.75,
         ),
         centerTitle: true,
-        backgroundColor: Colors.purple,
+        backgroundColor: Theme.of(context).primaryColor,
       ),
       body:  _children[_currentIndex], // Selected widget will be shown
       bottomNavigationBar: BottomNavigationBar(
@@ -305,8 +337,9 @@ class _HomeCardState extends State<HomeCard>{
             label: 'Profile',
           ),
         ],
-        backgroundColor: Colors.grey[200],
-        selectedItemColor: Colors.purple,
+        backgroundColor: Theme.of(context).dialogBackgroundColor,
+        unselectedItemColor: Colors.grey,
+        selectedItemColor: Theme.of(context).primaryColor,
       ),
     );
   }

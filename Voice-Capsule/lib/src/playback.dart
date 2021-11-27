@@ -262,7 +262,7 @@ class _SimplePlaybackState extends State<SimplePlayback> {
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         Slider(
-          activeColor: Colors.purple,
+          activeColor: Theme.of(context).primaryColor,
           value: time + 0.0,
           min: 0.0,
           max: duration + 0.0,

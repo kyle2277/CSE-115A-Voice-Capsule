@@ -271,7 +271,7 @@ class _SenderScreenState extends State<SenderScreen> {
       appBar: AppBar(
         title: Text("Send Recording"),
         centerTitle: true,
-        backgroundColor: Colors.purple,
+        backgroundColor: Theme.of(context).primaryColor,
       ),
       body: Center(
         child: Column (
@@ -284,11 +284,14 @@ class _SenderScreenState extends State<SenderScreen> {
               padding: const EdgeInsets.only(left: 65.0, right: 65.0, bottom: 10.0),
               child: DateTimeField(
                 decoration: InputDecoration(
-                    icon: Icon(Icons.calendar_today),
+                    icon: Icon(
+                        Icons.calendar_today,
+                      color: Theme.of(context).primaryColor,
+                    ),
                     labelText: 'Click to select open date',
                     labelStyle: TextStyle(
                       fontSize: 20,
-                      color: Colors.purple,
+                      color: Theme.of(context).primaryColor,
                     ),
                 ),
                 format: DATE_TIME_FORMAT,
@@ -337,12 +340,12 @@ class _SenderScreenState extends State<SenderScreen> {
                   icon: const Icon(Icons.arrow_downward),
                   iconSize: 24,
                   elevation: 16,
-                  style: const TextStyle(
-                      color: Colors.purple,
+                  style: TextStyle(
+                      color: Theme.of(context).primaryColor,
                   ),
                   underline: Container(
                     height: 2,
-                    color: Colors.purple,
+                    color: Theme.of(context).primaryColor,
                   ),
                   onChanged: (String? newValue) {
                     setState(() {
@@ -370,7 +373,7 @@ class _SenderScreenState extends State<SenderScreen> {
               child: Text('SEND'),
               style: OutlinedButton.styleFrom(
                   primary: Colors.white,
-                  backgroundColor: Colors.purple,
+                  backgroundColor: Theme.of(context).primaryColor,
               ),
               onPressed: () {
                 String? senderID = widget.contacts["Myself"];
