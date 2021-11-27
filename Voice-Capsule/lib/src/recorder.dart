@@ -286,7 +286,7 @@ class _SenderScreenState extends State<SenderScreen> {
               child: DateTimeField(
                 decoration: InputDecoration(
                     icon: Icon(
-                        Icons.calendar_today,
+                      Icons.calendar_today,
                       color: Theme.of(context).primaryColor,
                     ),
                     labelText: 'Click to select open date',
@@ -302,12 +302,43 @@ class _SenderScreenState extends State<SenderScreen> {
                       context: context,
                       firstDate: DateTime(1900),
                       initialDate: currentValue ?? DateTime.now(),
-                      lastDate: DateTime(2100));
+                      lastDate: DateTime(2100),
+                      builder: (context, child) {
+                        // Todo: refactor theme into a separate file for easy refs
+                        return Theme(
+                          data: ThemeData.dark().copyWith(
+                            colorScheme: ColorScheme.dark(
+                              primary: Theme.of(context).primaryColor,
+                              onPrimary: Theme.of(context).hintColor,
+                              surface: Theme.of(context).primaryColor,
+                              onSurface: Theme.of(context).hintColor,
+                            ),
+                            dialogBackgroundColor : Theme.of(context).dialogBackgroundColor,
+                          ),
+                          child: child!,
+                        );
+                      },
+                  );
                   if (date != null) {
                     final time = await showTimePicker(
                       context: context,
                       initialTime:
                       TimeOfDay.fromDateTime(currentValue ?? DateTime.now()),
+                      builder: (context, child) {
+                        // Todo: refactor theme into a separate file for easy refs
+                        return Theme(
+                          data: ThemeData.dark().copyWith(
+                            colorScheme: ColorScheme.dark(
+                              primary: Theme.of(context).primaryColor,
+                              onPrimary: Theme.of(context).hintColor,
+                              surface: Theme.of(context).dialogBackgroundColor,
+                              onSurface: Theme.of(context).hintColor,
+                            ),
+                            dialogBackgroundColor : Theme.of(context).dialogBackgroundColor,
+                          ),
+                          child: child!,
+                        );
+                      },
                     );
                     DateTime fieldValue = DateTimeField.combine(date, time);
                     setState(() {
