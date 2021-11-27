@@ -440,8 +440,10 @@ class _FriendRequestState extends State<FriendRequestScreen> {
                                           .doc(otherUserUid[0]).update({
                                         'contacts' : otherUserContacts
                                       }); // now push change
-                                      //
-                                      // // TODO make sure when you go back, friends list is already refreshed
+                                      // Refresh send page contacts list
+                                      await ContactsSlide.populateUserContacts().then((value) async {
+                                        setState(() {});
+                                      });
                                       showToast_quick(context, "Friend request accepted");
                                       setState((){}); // refresh
                                     },
