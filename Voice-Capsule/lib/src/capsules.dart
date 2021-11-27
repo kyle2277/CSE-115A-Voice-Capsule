@@ -132,8 +132,8 @@ class _CapsulesSlideState extends State<CapsulesSlide> with SingleTickerProvider
   }
 
   // Color generator for new capsule glow animation
-  Color getNewCapsuleColor(double lightness) {
-    HSLColor col = HSLColor.fromColor(Colors.purple);
+  Color getNewCapsuleColor(double lightness, BuildContext context) {
+    HSLColor col = HSLColor.fromColor(Theme.of(context).primaryColor);
     col = col.withLightness(lightness);
     return col.toColor();
   }
@@ -149,7 +149,7 @@ class _CapsulesSlideState extends State<CapsulesSlide> with SingleTickerProvider
             itemBuilder: (context, index) {
               return Card(
                 child: ListTile(
-                    tileColor: capsules[index].opened ? Theme.of(context).dialogBackgroundColor : getNewCapsuleColor(newCapsuleAnimation.value),
+                    tileColor: capsules[index].opened ? Theme.of(context).dialogBackgroundColor : getNewCapsuleColor(newCapsuleAnimation.value, context),
                     trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -189,9 +189,12 @@ class _CapsulesSlideState extends State<CapsulesSlide> with SingleTickerProvider
                         ]
                     ),
                     // Todo: change colors for the capsules
-                    title:Text(
+                    title: Text(
                       getCapsuleTitle(capsules[index]),
                       textScaleFactor: 0.9,
+                      style: TextStyle(
+                        color: Colors.grey,
+                      ),
                     ),
                     subtitle: Text(
                       capsules[index].toString(),
