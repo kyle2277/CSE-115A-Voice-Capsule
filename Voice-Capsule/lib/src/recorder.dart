@@ -372,6 +372,7 @@ class _SenderScreenState extends State<SenderScreen> {
                   icon: const Icon(Icons.arrow_downward),
                   iconSize: 24,
                   elevation: 16,
+                  dropdownColor: Theme.of(context).dialogBackgroundColor,
                   style: TextStyle(
                       color: Theme.of(context).primaryColor,
                   ),

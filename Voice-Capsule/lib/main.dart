@@ -224,7 +224,6 @@ class App extends StatelessWidget {
               // Dark theme will use darkPurple as the main color
               darkTheme: ThemeData(
                 hintColor: Colors.white,
-
                 buttonTheme: Theme.of(context).buttonTheme.copyWith(
                   highlightColor: Colors.deepPurple,
                 ),
