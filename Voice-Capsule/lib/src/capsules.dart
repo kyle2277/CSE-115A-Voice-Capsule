@@ -192,17 +192,19 @@ class _CapsulesSlideState extends State<CapsulesSlide> with SingleTickerProvider
                           ),
                         ]
                     ),
-                    // Todo: change colors for the capsules
                     title: Text(
                       getCapsuleTitle(capsules[index]),
                       textScaleFactor: 0.9,
                       style: TextStyle(
-                        color: Colors.grey,
+                        color: capsules[index].opened ? Colors.grey : Colors.black45,
                       ),
                     ),
                     subtitle: Text(
                       capsules[index].toString(),
                       textScaleFactor: 1.5,
+                      style: TextStyle(
+                        color: capsules[index].opened ? Colors.grey : Colors.black54,
+                      ),
                     ),
                     onTap : () async {
                       VoiceCapsule capsule = capsules[index];
