@@ -308,11 +308,10 @@ class _SenderScreenState extends State<SenderScreen> {
                       lastDate: DateTime(2100),
                       builder: (context, child) {
                         return Theme(
-                          data: ThemeData.dark().copyWith(
-                            colorScheme: ColorScheme.dark(
+                          data: ThemeData(
+                            colorScheme: Theme.of(context).colorScheme.copyWith(
                               primary: Theme.of(context).primaryColor,
-                              onPrimary: Theme.of(context).hintColor,
-                              surface: Theme.of(context).primaryColor,
+                              secondary: Theme.of(context).primaryColor,
                               onSurface: Theme.of(context).hintColor,
                             ),
                             dialogBackgroundColor : Theme.of(context).dialogBackgroundColor,
@@ -327,16 +326,18 @@ class _SenderScreenState extends State<SenderScreen> {
                       initialTime:
                       TimeOfDay.fromDateTime(currentValue ?? DateTime.now()),
                       builder: (context, child) {
-                        // Todo: refactor theme into a separate file for easy refs
                         return Theme(
-                          data: ThemeData.dark().copyWith(
-                            colorScheme: ColorScheme.dark(
-                              primary: Theme.of(context).primaryColor,
-                              onPrimary: Theme.of(context).hintColor,
+                          data: ThemeData(
+                            colorScheme: Theme.of(context).colorScheme.copyWith(
                               surface: Theme.of(context).dialogBackgroundColor,
                               onSurface: Theme.of(context).hintColor,
                             ),
                             dialogBackgroundColor : Theme.of(context).dialogBackgroundColor,
+                            textTheme: Theme.of(context).textTheme.copyWith(
+                              headline1: TextStyle(
+                                color: Theme.of(context).hintColor,
+                              ),
+                            ),
                           ),
                           child: child!,
                         );
