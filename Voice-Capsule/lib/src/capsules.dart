@@ -1,18 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
-import 'package:flutter_sound_platform_interface/flutter_sound_platform_interface.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'playback.dart';
 import 'voice_capsule.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:path/path.dart';
-
 import 'utils.dart';
 import 'authentication.dart';
-import 'voice_capsule.dart';
-
 
 /*
  * Capsules page
