@@ -11,12 +11,6 @@ import 'src/contacts.dart';
 import 'src/profile.dart';
 import 'src/themes.dart';
 
-/*
- TODO:
-  * blank_profile_pic.png?
-  * fix text colors on date/time picker
- */
-
 // Login functions
 class ApplicationState extends ChangeNotifier {
   ApplicationState() {
