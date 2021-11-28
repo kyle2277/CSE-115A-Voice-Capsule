@@ -62,6 +62,7 @@ class Authentication extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     switch (loginState) {
       case ApplicationLoginState.loggedOut:
         return Scaffold(
@@ -71,7 +72,19 @@ class Authentication extends StatelessWidget {
               children: [
                 // Placeholder for spacing before more UI elements added
                 SizedBox(
-                  height: 200.00,
+                  height: 10.00,
+                ),
+                Positioned(
+                  top:0,
+                  left:0,
+                  //Main logo image
+                  child: Image.asset(
+                    "assets/images/logo.png",
+                    width: size.width*0.55,
+                  ),
+                ),
+                SizedBox(
+                  height: 20.00,
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
