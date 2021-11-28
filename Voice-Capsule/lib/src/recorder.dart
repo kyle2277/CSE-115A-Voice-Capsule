@@ -303,41 +303,41 @@ class _SenderScreenState extends State<SenderScreen> {
                       firstDate: DateTime(1900),
                       initialDate: currentValue ?? DateTime.now(),
                       lastDate: DateTime(2100),
-                      builder: (context, child) {
-                        return Theme(
-                          data: ThemeData.dark().copyWith(
-                            colorScheme: ColorScheme.dark(
-                              primary: Theme.of(context).primaryColor,
-                              onPrimary: Theme.of(context).hintColor,
-                              surface: Theme.of(context).primaryColor,
-                              onSurface: Theme.of(context).hintColor,
-                            ),
-                            dialogBackgroundColor : Theme.of(context).dialogBackgroundColor,
-                          ),
-                          child: child!,
-                        );
-                      },
+                      // builder: (context, child) {
+                      //   return Theme(
+                      //     data: ThemeData.dark().copyWith(
+                      //       colorScheme: ColorScheme.dark(
+                      //         primary: Theme.of(context).primaryColor,
+                      //         onPrimary: Theme.of(context).hintColor,
+                      //         surface: Theme.of(context).primaryColor,
+                      //         onSurface: Theme.of(context).hintColor,
+                      //       ),
+                      //       dialogBackgroundColor : Theme.of(context).dialogBackgroundColor,
+                      //     ),
+                      //     child: child!,
+                      //   );
+                      // },
                   );
                   if (date != null) {
                     final time = await showTimePicker(
                       context: context,
                       initialTime:
                       TimeOfDay.fromDateTime(currentValue ?? DateTime.now()),
-                      builder: (context, child) {
-                        // Todo: refactor theme into a separate file for easy refs
-                        return Theme(
-                          data: ThemeData.dark().copyWith(
-                            colorScheme: ColorScheme.dark(
-                              primary: Theme.of(context).primaryColor,
-                              onPrimary: Theme.of(context).hintColor,
-                              surface: Theme.of(context).dialogBackgroundColor,
-                              onSurface: Theme.of(context).hintColor,
-                            ),
-                            dialogBackgroundColor : Theme.of(context).dialogBackgroundColor,
-                          ),
-                          child: child!,
-                        );
-                      },
+                      // builder: (context, child) {
+                      //   // Todo: refactor theme into a separate file for easy refs
+                      //   return Theme(
+                      //     data: ThemeData.dark().copyWith(
+                      //       colorScheme: ColorScheme.dark(
+                      //         primary: Theme.of(context).primaryColor,
+                      //         onPrimary: Theme.of(context).hintColor,
+                      //         surface: Theme.of(context).dialogBackgroundColor,
+                      //         onSurface: Theme.of(context).hintColor,
+                      //       ),
+                      //       dialogBackgroundColor : Theme.of(context).dialogBackgroundColor,
+                      //     ),
+                      //     child: child!,
+                      //   );
+                      // },
                     );
                     DateTime fieldValue = DateTimeField.combine(date, time);
                     setState(() {
