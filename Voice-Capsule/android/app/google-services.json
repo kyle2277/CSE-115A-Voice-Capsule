@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "624904571325",
+    "project_id": "voice-capsule-3dedd",
+    "storage_bucket": "voice-capsule-3dedd.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:624904571325:android:95b582689e014205b7aad4",
+        "android_client_info": {
+          "package_name": "com.ucsc.voice_capsule"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "624904571325-p5vn3m9a8bnm0k1qk7rpk26kaifle3l3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDrlRxDf08j6POvYYELk4Vd5YATg6uZmPk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "624904571325-p5vn3m9a8bnm0k1qk7rpk26kaifle3l3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
