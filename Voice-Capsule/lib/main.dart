@@ -1,21 +1,21 @@
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_sound/flutter_sound.dart';
 import 'src/authentication.dart';
 import 'src/recorder.dart';
 import 'src/capsules.dart';
 import 'src/contacts.dart';
-import 'src/playback.dart';
-import 'src/widgets.dart';
 import 'src/profile.dart';
-import 'src/utils.dart';
 import 'src/themes.dart';
+
+/*
+ TODO:
+  * blank_profile_pic.png?
+  * fix text colors on date/time picker
+ */
 
 // Login functions
 class ApplicationState extends ChangeNotifier {

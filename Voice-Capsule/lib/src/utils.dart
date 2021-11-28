@@ -46,7 +46,7 @@ void showToast_quick(BuildContext context, String message, {double duration = 2}
   );
 }
 
-// Might roll these up into one showAlertDialog that can be customized?
+// Show an alert dialog with an "OK" button
 Future<void> showAlertDialog_OK(BuildContext context, String title, String message) async {
   return showDialog<void>(
     context: context,
@@ -73,6 +73,7 @@ Future<void> showAlertDialog_OK(BuildContext context, String title, String messa
   );
 }
 
+// Show an alert dialog with "Yes" and "No" buttons
 Future<bool?> showAlertDialog_YESNO(BuildContext context, String title, String message, {double textScale = 1.0}) async {
   return showDialog<bool>(
     context: context,
@@ -124,6 +125,7 @@ String sanitizeString(String input) {
   return output;
 }
 
+// Show an error dialog with a given message
 Future<void> showAlertDialog_ERROR(BuildContext context, String message) async {
   return showDialog<void>(
     context: context,

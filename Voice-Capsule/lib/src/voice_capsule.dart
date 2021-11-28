@@ -1,11 +1,8 @@
 import 'dart:io';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart' as fireStorage;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:io';
 import 'utils.dart';
 import 'authentication.dart';
 import 'package:intl/intl.dart';
@@ -295,8 +292,13 @@ class VoiceCapsule {
   }
 
   // String representation of a capsule is the sender's name
+  // If sender is current user, return "Myself"
   String toString() {
-    return senderName;
+    if(myName == null) {
+      return senderName;
+    } else {
+      return senderName == myName ? "Myself" : senderName;
+    }
   }
 
   // Override operators for comparing voice capsules

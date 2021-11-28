@@ -41,9 +41,9 @@ class ProfileSlide extends StatelessWidget{
                             offset: Offset(0,10)
                           )],
                       shape: BoxShape.circle,
-                      image: DecorationImage(
+                      image: const DecorationImage(
                         fit: BoxFit.cover,
-                        image: NetworkImage("https://lh3.googleusercontent.com/a-/AAuE7mBjk23t3G5-YiQxEseXi6MLp7_CMtmp3d5PfHCD=s640-rw-il")
+                        image: AssetImage("assets/images/zenslug_2.gif"),
                       )
                     )
                   ),
