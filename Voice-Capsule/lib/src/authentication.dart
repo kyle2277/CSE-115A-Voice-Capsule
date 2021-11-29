@@ -74,9 +74,7 @@ class Authentication extends StatelessWidget {
                 SizedBox(
                   height: 10.00,
                 ),
-                Positioned(
-                  top:0,
-                  left:0,
+                Container(
                   //Main logo image
                   child: Image.asset(
                     "assets/images/logo.png",
