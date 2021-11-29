@@ -243,9 +243,9 @@ class VoiceCapsule {
     String saveFileName = "Voice-Capsule_${sanitizeString(senderName)}_${sanitizeString(openDateTime.toString())}.mp4";
     String saveFilePath = "$ANDROID_DOWNLOADS_PATH/$saveFileName";
     print("Want to save $localFileName to device Downloads folder...");
-    // print("Download file name: $saveFileName");
-    // print("Voice capsule path: $audioFilePath");
-    // print("Download file path: $saveFilePath");
+    //print("Download file name: $saveFileName");
+    //print("Voice capsule path: $audioFilePath");
+    //print("Download file path: $saveFilePath");
     File audioFile = File(audioFilePath);
     File saveFile = File(saveFilePath);
     // Append (x) to end of filename to make it unique if file already exists
@@ -263,6 +263,13 @@ class VoiceCapsule {
     }
     await audioFile.copy(saveFilePath);
     return true;
+    // try {
+    //   await audioFile.copy(saveFilePath);
+    //   return true;
+    // } on FileSystemException catch(e) {
+    //   print("ERROR: ${e.message}");
+    //   return false;
+    // }
   }
 
   // Sets 'opened' flag in the current VoiceCapsule object
