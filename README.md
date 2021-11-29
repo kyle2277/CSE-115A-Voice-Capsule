@@ -41,5 +41,5 @@
 ### How To Use
 After all required software has been installed, feel free to run the application. 
 * In order to use any functionalities provided by the application, you must first create an account. The initial screen will contain a sign-up button. Go ahead and press it! Make sure to fill in the necessary information. 
-* Next, you will be taken to the recording screen. Feel free to record a voice capsule or surf the other pages via the Bottom Navigation Bar.
+* Next, you will be taken to the recording screen. Feel free to record a voice capsule or surf the other pages via the Bottom Navigation Bar. Try adding a friend on the app!
 * Find the Logout Button by clicking the Profile tab.
