@@ -33,3 +33,9 @@
 <p> We have three SCRUM stand-up meetings a week via Zoom. We also endeavour to meet once a week in person. </p>
 <p> Our team is characterized by team-mates who like to <b> collaborate</b>, <b>learn loads </b>, and <b>have fun! </b></p>
 
+### Requirements for running in Android Studio
+* Android Emulator (Android 10 or newer)
+* Dart SDK
+* Flutter SDK
+
+### How To Use
