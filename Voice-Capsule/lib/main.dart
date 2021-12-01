@@ -103,7 +103,6 @@ class ApplicationState extends ChangeNotifier {
         // Get user information from database
         setUserInformation(userInfoErrorCallback);
         firebaseUser = FirebaseAuth.instance.currentUser;
-        // Todo: fetch user contacts from database and populate contacts map with <User name, UserID> key-values
         ContactsSlide.populateUserContacts();
       });
       // Hack so that LoginCard is in loggedOut state next time signOut() is called
@@ -172,7 +171,6 @@ class ApplicationState extends ChangeNotifier {
       add_friends.doc('all_users').set({
         '${firebaseUser!.email}' : {'${displayName}' : firebaseUser!.uid,},
       }, SetOptions(merge: true));
-      // todo check that email is valid (ie not already in use by another account), erroneously transfers to home card after failed registration
       _loginState = ApplicationLoginState.loggedOut;
     } on FirebaseAuthException catch (e) {
       errorCallback(e);
