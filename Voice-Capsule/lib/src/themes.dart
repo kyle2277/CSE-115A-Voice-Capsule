@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+/*
+ * Global specification of light and dark theme app colors
+ */
+
 // Levels of darkness for specific colors in the themes
 const int dialogLevel = 850;
 const int scaffoldLevel = 900;

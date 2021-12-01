@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'utils.dart';
 
-// todo remove hardcoding of file path
+/*
+ * MP4 audio file player UI and functions
+ */
+
 const double FIVE_SECONDS_IN_MILLIS = 5000;
 
 class SimplePlayback extends StatefulWidget {
-  //const SimplePlayback({Key? key}) : super(key: key);
   SimplePlayback({
     required this.audioFileUrl,
     this.autoStart = false,
@@ -174,6 +176,7 @@ class _SimplePlaybackState extends State<SimplePlayback> {
     });
   }
 
+  // Returns status of player in text format
   String getPlaybackTextStatus() {
     if(_mPlayer == null) {
       return "";
@@ -188,6 +191,7 @@ class _SimplePlaybackState extends State<SimplePlayback> {
     }
   }
 
+  // Returns status of player in icon format
   Icon getPlayIcon() {
     if (!_mPlayerIsInited) {
       return Icon(Icons.play_arrow);

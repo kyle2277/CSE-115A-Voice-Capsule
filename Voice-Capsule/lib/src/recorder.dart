@@ -12,7 +12,7 @@ import 'utils.dart';
 import 'authentication.dart';
 
 /*
- * Class for recording audio from device microphone
+ * MP4 audio recorder using device microphone
  */
 
 class SimpleRecorder extends StatefulWidget {
@@ -96,7 +96,6 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
     if(status != PermissionStatus.granted) {
       throw RecordingPermissionException('Microphone permission not granted');
     }
-
     await recorder!.openAudioSession();
     if(!await recorder!.isEncoderSupported(_codec)) {
       return false;
@@ -107,6 +106,7 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
 
   // Recording and playback ----------------------------------------------------
 
+  // Start recording from device microphone
   Future<bool> record() async {
     print('START recording');
     // Clear path to last recorded file
@@ -122,6 +122,7 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
     return true;
   }
 
+  // Stop recording, save audio file, and transition to send capsule page
   Future<bool> stopRecording() async {
     print('STOP recording');
     await recorder!.stopRecorder().then((value) {
@@ -159,7 +160,6 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
   }
 
   // Basic Recorder UI
-  // todo fix pixel overflow at bottom of screen
   @override
   Widget build(BuildContext context) {
     return Column (
@@ -204,11 +204,6 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
             });
           },
         ),
-        // Decibel level indicator
-        // Text(
-        //   recorder!.isRecording ? 'dB: ${((dbLevel * 100.0).floor() / 100)}' : '',
-        //   textScaleFactor: 1.25,
-        // ),
         // Recording text indicator
         Text(
           recorder!.isRecording ? 'Recording' : 'Record',

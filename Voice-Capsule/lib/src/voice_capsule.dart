@@ -9,13 +9,18 @@ import 'package:intl/intl.dart';
 
 /*
 Voice Capsules .data file format:
+Sender name
 sender UID
+Receiver name
 receiver UID
 open date/time
 firebase storage path
 local file name
+opened status (no line if not opened)
  */
 
+// Data type representing a single voice capsule
+// Used for sending/fetching Voice Capsules to/from Firebase database
 class VoiceCapsule {
   String senderName;
   String senderUID;
@@ -64,6 +69,8 @@ class VoiceCapsule {
     });
   }
 
+  // Uploads the Voice Capsule audio file to Firebase Storage and adds fields for this capsule to
+  // sender's/receiver's respective "sent_capsules" and "pending_capsules" documents in Firestore Database
   Future<bool> sendToDatabase() async {
     // Grab reference to the users collection
     CollectionReference all_users = FirebaseFirestore.instance
@@ -261,15 +268,13 @@ class VoiceCapsule {
       print("ERROR: Cannot download Voice Capsule, audio file DOES NOT EXIST.");
       return false;
     }
-    await audioFile.copy(saveFilePath);
-    return true;
-    // try {
-    //   await audioFile.copy(saveFilePath);
-    //   return true;
-    // } on FileSystemException catch(e) {
-    //   print("ERROR: ${e.message}");
-    //   return false;
-    // }
+    try {
+      await audioFile.copy(saveFilePath);
+      return true;
+    } on FileSystemException catch(e) {
+      print("ERROR: ${e.message}");
+      return false;
+    }
   }
 
   // Sets 'opened' flag in the current VoiceCapsule object
@@ -294,6 +299,7 @@ class VoiceCapsule {
     return true;
   }
 
+  // Returns the path to this capsule's audio file on the local device
   String getCapsuleFilePath() {
     return "$CAPSULES_DIRECTORY/$receiverUID/$localFileName";
   }
@@ -330,6 +336,5 @@ class _StorageException implements Exception {
 
 // Permission to access storage was not granted
 class StoragePermissionException extends _StorageException {
-  //  Permission to record was not granted
   StoragePermissionException(String message) : super(message);
 }

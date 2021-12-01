@@ -11,17 +11,30 @@ import 'src/contacts.dart';
 import 'src/profile.dart';
 import 'src/themes.dart';
 
-// Login functions
+/*
+ * Voice Capsule
+ * CSE 115A - Introduction to Software Engineering
+ * UC Santa Cruz, Fall 2021
+ * Contributors:
+ *     Daniel Zuniga       <dzuniga1@ucsc.edu>
+ *     Jovita Matinez      <jmart262@ucsc.edu>
+ *     Kyle Won            <kwon@ucsc.edu>
+ *     Marianna Marcelline <mgmarcel@ucsc.edu>
+ *     Ricardo Gonzalez    <riagonza@ucsc.edu>
+ */
+
 class ApplicationState extends ChangeNotifier {
   ApplicationState() {
     init();
   }
 
+  // Initialize app and Firebase
   Future<void> init() async {
     await Firebase.initializeApp();
     _loginState = ApplicationLoginState.loggedOut;
   }
 
+  // Authentication globals
   ApplicationLoginState _loginState = ApplicationLoginState.loggedOut;
   ApplicationLoginState get loginState => _loginState;
 
@@ -38,6 +51,7 @@ class ApplicationState extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Determines if given text is a valid email address and belongs to a current user account
   void verifyEmail(
       String email,
       void Function(FirebaseAuthException e) errorCallback,
@@ -74,6 +88,7 @@ class ApplicationState extends ChangeNotifier {
     }
   }
 
+  // Signs in user with email and password, sets user information globals in authentication.dart
   Future signInWithEmailAndPassword(
       String email,
       String password,
@@ -165,6 +180,7 @@ class ApplicationState extends ChangeNotifier {
     }
   }
 
+  // Sign out the current user
   void signOut() {
     //_loginState = ApplicationLoginState.loggedOut;
     // notifyListeners();
@@ -306,6 +322,7 @@ class _HomeCardState extends State<HomeCard>{
     );
   }
 
+  // Sets the index for the current page
   void onTabTapped(int index) {
     setState(() {
       _currentIndex = index;

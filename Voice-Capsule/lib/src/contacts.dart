@@ -7,7 +7,7 @@ import 'authentication.dart';
 import 'utils.dart';
 
 /*
- * Contacts page
+ * Contacts page UI and functions
  */
 
 // Mapping of friends' names to friends' UIDs
@@ -152,6 +152,7 @@ class _ContactsSlideState extends State<ContactsSlide>{
     );
   }
 
+  // If user has pending friend requests, show pop-up message
   void friendRequestAlert() async {
     var thisUser = await FirebaseFirestore.instance
         .collection('users')

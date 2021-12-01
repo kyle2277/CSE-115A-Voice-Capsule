@@ -4,6 +4,9 @@ import 'package:voice_capsule/src/authentication.dart';
 import '../main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+/*
+ * Profile page UI and functions
+ */
 
 class ProfileSlide extends StatelessWidget{
   const ProfileSlide({Key? key}) : super(key: key);

@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 /*
  * Utility functions for general app UI features
  */
 
+// Human readable date/time format
 final DATE_TIME_FORMAT = DateFormat("MM-dd-yyyy, hh:mm a");
+// Path to recorded audio files
 const String CAPSULES_DIRECTORY = "/data/user/0/com.ucsc.voice_capsule/cache";
+// Path to Downloads folder on Android devices
 const String ANDROID_DOWNLOADS_PATH = "/storage/emulated/0/Download";
 
 // Shows "snackbar" style popup with the given message and an OK button

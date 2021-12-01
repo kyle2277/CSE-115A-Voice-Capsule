@@ -9,7 +9,7 @@ import 'utils.dart';
 import 'authentication.dart';
 
 /*
- * Capsules page
+ * Capsule page UI and functions
  */
 
 // Capsules Slide
@@ -20,7 +20,6 @@ class CapsulesSlide extends StatefulWidget {
   @override
   _CapsulesSlideState createState() => _CapsulesSlideState();
 }
-
 
 class _CapsulesSlideState extends State<CapsulesSlide> with SingleTickerProviderStateMixin {
   // List of available capsules
@@ -244,7 +243,7 @@ class _CapsulesSlideState extends State<CapsulesSlide> with SingleTickerProvider
   }
 }
 
-// Page to send recording and other options
+// Page to play given audio file
 class PlaybackScreen extends StatefulWidget {
   PlaybackScreen (this.localFileName);
 
