@@ -17,7 +17,7 @@ import 'src/themes.dart';
  * UC Santa Cruz, Fall 2021
  * Contributors:
  *     Daniel Zuniga       <dzuniga1@ucsc.edu>
- *     Jovita Matinez      <jmart262@ucsc.edu>
+ *     Jovita Martinez      <jmart262@ucsc.edu>
  *     Kyle Won            <kwon@ucsc.edu>
  *     Marianna Marcelline <mgmarcel@ucsc.edu>
  *     Ricardo Gonzalez    <riagonza@ucsc.edu>
